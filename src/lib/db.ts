@@ -35,3 +35,4 @@ export async function query<T = Record<string, unknown>>(
   const result = await db.query(text, params);
   return result.rows as T[];
 }
+export default { query, getDb };
