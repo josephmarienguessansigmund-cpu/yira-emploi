@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL")
+}
+
+model Jeune {
+  id                String   @id @default(cuid())
+  nom               String
+  prenom            String
+  telephone         String   @unique
+  email             String?
+  niveau            String?
+  district          String?
+  codeYira          String?  @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  testsSigmund      TestSigmund[]
+  paiements         Paiement[]
+}
+
+model TestSigmund {
+  id                  String    @id @default(cuid())
+  jeuneId             String
+  jeune               Jeune     @relation(fields: [jeuneId], references: [id])
+  sigmundTestId       String?
+  completedAt         DateTime?
+  estValideParExpert  Boolean   @default(false)
+  rapport             String?
+  createdAt           DateTime  @default(now())
+}
+
+model Paiement {
+  id          String   @id @default(cuid())
+  jeuneId     String
+  jeune       Jeune    @relation(fields: [jeuneId], references: [id])
+  montant     Float
+  statut      String   @default("pending")
+  operateur   String?
+  reference   String?
+  createdAt   DateTime @default(now())
+}
