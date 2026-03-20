@@ -1,32 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, jeuneId } = await request.json();
+    const { message } = await request.json();
 
     if (!message) {
       return NextResponse.json({ error: 'Message requis' }, { status: 400 });
     }
 
-    let contexte = '';
-    if (jeuneId) {
-      try {
-        const jeune = await prisma.jeune.findUnique({
-          where: { id: jeuneId },
-          include: { testsSigmund: true }
-        });
-        if (jeune) {
-          contexte = `Jeune: ${jeune.nom} ${jeune.prenom}`;
-        }
-      } catch (e) {
-        console.error('Erreur profil:', e);
-      }
-    }
-
-    const reponse = `Bonjour ! Je suis l'assistant YIRA. Comment puis-je vous aider ?`;
+    const reponse = `Bonjour ! Je suis l'assistant YIRA. Comment puis-je vous aider dans votre parcours d'insertion professionnelle en Côte d'Ivoire ?`;
 
     return NextResponse.json({ reponse });
 
