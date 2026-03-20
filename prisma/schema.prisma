@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model YiraExpert {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  nom          String
+  prenom       String?
+  pays         String?
+  role         String   @default("expert")
+  tokensCount  Int      @default(10) @map("tokens_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  beneficiaires Talent[]
+
+  @@map("YiraExpert")
+}
+
+model Talent {
+  id                String   @id @default(cuid())
+  nom               String
+  prenom            String
+  telephone         String   @unique
+  email             String?
+  dateNaissance     DateTime?
+  genre             String?
+  niveau            String?
+  specialite        String?
+  situationActuelle String?
+  district          String?
+  commune           String?
+  quartier          String?
+  zoneGeo           String?
+  canalPrefere      String?
+  consentementRGPD  Boolean  @default(false)
+  codeYira          String?  @unique
+  statutParcours    String   @default("INSCRIT")
+  assignedExpertId  String?  @map("assigned_expert_id")
+  assignedExpert    YiraExpert? @relation(fields: [assignedExpertId], references: [id])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  testsSigmund      TestSigmund[]
+  paiements         Paiement[]
+
+  @@map("YiraBeneficiaire") 
+}
+
+model TestSigmund {
+  id                 String   @id @default(cuid())
+  talentId           String   @map("jeune_id")
+  talent             Talent   @relation(fields: [talentId], references: [id])
+  sigmundTestId      String?
+  completedAt        DateTime?
+  estValideParExpert Boolean  @default(false)
+  rapport            String?
+  createdAt          DateTime @default(now())
+}
+
+model Paiement {
+  id        String   @id @default(cuid())
+  talentId  String   @map("jeune_id")
+  talent    Talent   @relation(fields: [talentId], references: [id])
+  montant   Float
+  statut    String   @default("pending")
+  operateur String?
+  reference String?
+  createdAt DateTime @default(now())
+}
