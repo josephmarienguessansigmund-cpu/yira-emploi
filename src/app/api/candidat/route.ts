@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // 1. Normalisation du numéro (Format Côte d'Ivoire +225)
+    // 1. Normalisation du numéro
     let phone = telephone.replace(/[\s-]/g, '');
     if (phone.startsWith('0') && phone.length === 10) {
       phone = '+225' + phone.substring(1);
@@ -23,21 +23,21 @@ export async function GET(req: NextRequest) {
       phone = '+225' + phone;
     }
 
-    // 2. PROBLEME 1 : Recherche dans la table 'talent' (anciennement 'jeune')
+    // 2. Recherche du Talent (Anciennement Jeune)
     const talent = await prisma.talent.findUnique({
       where: { telephone: phone },
       select: { id: true, prenom: true, nom: true },
     });
 
-    // 3. PROBLEME 2 : Utilisation du "!" (SI le talent n'existe pas)
+    // 3. Vérification avec l'opérateur "!"
     if (!talent) {
       return NextResponse.json(
-        { error: "Aucun profil trouvé avec ce numéro. Veuillez vous inscrire d'abord." },
+        { error: 'Aucun profil trouvé avec ce numéro. Veuillez vous inscrire.' },
         { status: 404 }
       );
     }
 
-    // 4. PROBLEME 3 : On renvoie bien la variable 'talent' (et non 'jeune')
+    // 4. Retour des données (On utilise 'talent')
     return NextResponse.json({ success: true, data: talent });
 
   } catch (error) {
