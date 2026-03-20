@@ -10,12 +10,20 @@ export default function HomePage() {
             <h1 className="text-2xl font-bold text-green-700">YIRA Emploi</h1>
             <p className="text-sm text-slate-500">Plateforme d&apos;insertion professionnelle</p>
           </div>
-          <a
-            href="/expert"
-            className="bg-green-700 text-white px-5 py-2 rounded-lg font-medium hover:bg-green-800 transition-colors"
-          >
-            Espace Expert
-          </a>
+          <div className="flex items-center gap-3">
+            <a
+              href="/inscription"
+              className="bg-green-700 text-white px-5 py-2 rounded-lg font-medium hover:bg-green-800 transition-colors"
+            >
+              S&apos;inscrire
+            </a>
+            <a
+              href="/expert"
+              className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors"
+            >
+              Espace Expert
+            </a>
+          </div>
         </div>
       </header>
 
@@ -28,6 +36,20 @@ export default function HomePage() {
           YIRA accompagne les jeunes de C&ocirc;te d&apos;Ivoire vers l&apos;emploi gr&acirc;ce &agrave;
           l&apos;&eacute;valuation psychom&eacute;trique Sigmund et un acc&egrave;s simplifi&eacute; via USSD.
         </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="/inscription"
+            className="bg-green-700 text-white px-8 py-3 rounded-lg font-medium hover:bg-green-800 transition-colors text-lg"
+          >
+            S&apos;inscrire maintenant
+          </a>
+          <a
+            href="/test"
+            className="bg-white text-green-700 border-2 border-green-700 px-8 py-3 rounded-lg font-medium hover:bg-green-50 transition-colors text-lg"
+          >
+            Passer le test
+          </a>
+        </div>
       </section>
 
       {/* Features */}
