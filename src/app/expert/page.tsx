@@ -37,8 +37,13 @@ export default async function ExpertDashboard() {
                     <User className="text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg">{test.jeune.nom} {test.jeune.prenom}</h3>
+                    <h3 className="font-bold text-lg">{test.jeune.prenom} {test.jeune.nom}</h3>
                     <div className="flex gap-4 text-sm text-slate-500">
+                      {test.jeune.codeYira && (
+                        <span className="font-mono text-green-600">{test.jeune.codeYira}</span>
+                      )}
+                      <span>{test.jeune.niveau || ''}</span>
+                      <span>{test.jeune.district || ''}</span>
                       <span className="flex items-center gap-1">
                         <Clock size={14}/> {test.completedAt?.toLocaleDateString()}
                       </span>

@@ -1,4 +1,4 @@
-import { Users, ClipboardCheck, Briefcase, Phone } from 'lucide-react';
+import { Users, ClipboardCheck, Briefcase, Phone, Shield, Award } from 'lucide-react';
 
 export default function HomePage() {
   return (
@@ -8,7 +8,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-green-700">YIRA Emploi</h1>
-            <p className="text-sm text-slate-500">Plateforme d&apos;insertion professionnelle</p>
+            <p className="text-sm text-slate-500">Programme d&apos;insertion professionnelle — NOHAMA Consulting</p>
           </div>
           <div className="flex items-center gap-3">
             <a
@@ -34,7 +34,7 @@ export default function HomePage() {
         </h2>
         <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-8">
           YIRA accompagne les jeunes de C&ocirc;te d&apos;Ivoire vers l&apos;emploi gr&acirc;ce &agrave;
-          l&apos;&eacute;valuation psychom&eacute;trique Sigmund et un acc&egrave;s simplifi&eacute; via USSD.
+          l&apos;&eacute;valuation psychom&eacute;trique SigmundTest et un parcours personnalis&eacute; de formation et d&apos;insertion.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
@@ -52,16 +52,37 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Parcours en 4 étapes */}
+      <section className="max-w-6xl mx-auto px-6 pb-16">
+        <h3 className="text-2xl font-bold text-slate-900 text-center mb-8">Votre parcours YIRA</h3>
+        <div className="grid md:grid-cols-4 gap-4">
+          {[
+            { num: '1', title: 'Inscription', desc: 'Créez votre profil en ligne ou via USSD et recevez votre code YIRA unique.' },
+            { num: '2', title: 'Évaluation', desc: 'Passez les tests psychométriques SigmundTest adaptés à votre niveau.' },
+            { num: '3', title: 'Formation', desc: 'Suivez un parcours CQP personnalisé avec nos formateurs certifiés.' },
+            { num: '4', title: 'Emploi', desc: 'Accédez aux offres correspondant à votre profil grâce au matching intelligent.' },
+          ].map((etape) => (
+            <div key={etape.num} className="bg-white p-5 rounded-xl shadow-sm border text-center">
+              <div className="bg-green-700 text-white w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">
+                {etape.num}
+              </div>
+              <h4 className="font-bold text-lg mb-1">{etape.title}</h4>
+              <p className="text-slate-600 text-sm">{etape.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Features */}
       <section className="max-w-6xl mx-auto px-6 pb-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-xl shadow-sm border text-center">
             <div className="bg-green-100 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4">
               <Phone className="text-green-700" size={24} />
             </div>
-            <h3 className="font-bold text-lg mb-2">Acc&egrave;s USSD</h3>
+            <h3 className="font-bold text-lg mb-2">Acc&egrave;s Multi-Canal</h3>
             <p className="text-slate-600 text-sm">
-              Inscription et &eacute;valuation accessibles depuis n&apos;importe quel t&eacute;l&eacute;phone mobile.
+              Inscription et suivi via Web, USSD (*7572#) et SMS depuis n&apos;importe quel t&eacute;l&eacute;phone.
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border text-center">
@@ -70,33 +91,83 @@ export default function HomePage() {
             </div>
             <h3 className="font-bold text-lg mb-2">&Eacute;valuation Sigmund</h3>
             <p className="text-slate-600 text-sm">
-              Tests psychom&eacute;triques valid&eacute;s (Big Five, RIASEC, Soft Skills).
+              Tests psychom&eacute;triques valid&eacute;s (Big Five, RIASEC, Soft Skills, Motivation).
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border text-center">
             <div className="bg-orange-100 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4">
               <Users className="text-orange-700" size={24} />
             </div>
-            <h3 className="font-bold text-lg mb-2">Expertise humaine</h3>
+            <h3 className="font-bold text-lg mb-2">Conseillers d&eacute;di&eacute;s</h3>
             <p className="text-slate-600 text-sm">
-              Chaque r&eacute;sultat est analys&eacute; et valid&eacute; par un expert qualifi&eacute;.
+              Chaque b&eacute;n&eacute;ficiaire est accompagn&eacute; par un conseiller YIRA qualifi&eacute;.
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border text-center">
             <div className="bg-purple-100 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4">
               <Briefcase className="text-purple-700" size={24} />
             </div>
-            <h3 className="font-bold text-lg mb-2">Orientation emploi</h3>
+            <h3 className="font-bold text-lg mb-2">Matching Emploi</h3>
             <p className="text-slate-600 text-sm">
-              Recommandations personnalis&eacute;es pour l&apos;insertion professionnelle.
+              Algorithme de matching profil-emploi avec 500+ entreprises partenaires.
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded-xl shadow-sm border text-center">
+            <div className="bg-yellow-100 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Award className="text-yellow-700" size={24} />
+            </div>
+            <h3 className="font-bold text-lg mb-2">Certification CQP</h3>
+            <p className="text-slate-600 text-sm">
+              Obtenez un Certificat de Qualification Professionnelle reconnu avec QR code v&eacute;rifiable.
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded-xl shadow-sm border text-center">
+            <div className="bg-red-100 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Shield className="text-red-700" size={24} />
+            </div>
+            <h3 className="font-bold text-lg mb-2">Donn&eacute;es prot&eacute;g&eacute;es</h3>
+            <p className="text-slate-600 text-sm">
+              Vos donn&eacute;es personnelles sont prot&eacute;g&eacute;es conform&eacute;ment &agrave; la r&eacute;glementation RGPD.
             </p>
           </div>
         </div>
       </section>
 
+      {/* Chiffres clés */}
+      <section className="bg-green-700 text-white py-12">
+        <div className="max-w-6xl mx-auto px-6">
+          <h3 className="text-2xl font-bold text-center mb-8">Objectifs du Programme YIRA</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div>
+              <p className="text-4xl font-bold">25 000</p>
+              <p className="text-green-200 text-sm mt-1">Jeunes par an</p>
+            </div>
+            <div>
+              <p className="text-4xl font-bold">14</p>
+              <p className="text-green-200 text-sm mt-1">Districts couverts</p>
+            </div>
+            <div>
+              <p className="text-4xl font-bold">500+</p>
+              <p className="text-green-200 text-sm mt-1">Entreprises partenaires</p>
+            </div>
+            <div>
+              <p className="text-4xl font-bold">4</p>
+              <p className="text-green-200 text-sm mt-1">Canaux d&apos;acc&egrave;s</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className="bg-white border-t py-6 text-center text-sm text-slate-500">
-        <p>&copy; 2026 YIRA Emploi &mdash; NOHAMA Consulting &mdash; C&ocirc;te d&apos;Ivoire</p>
+      <footer className="bg-white border-t py-8">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <p className="text-sm text-slate-500">
+            &copy; 2026 YIRA Emploi &mdash; NOHAMA Consulting / SigmundTest CI &mdash; C&ocirc;te d&apos;Ivoire
+          </p>
+          <p className="text-xs text-slate-400 mt-2">
+            Programme d&apos;insertion professionnelle des jeunes &mdash; Financ&eacute; avec le soutien de la BAD, GIZ et AFD
+          </p>
+        </div>
       </footer>
     </div>
   );

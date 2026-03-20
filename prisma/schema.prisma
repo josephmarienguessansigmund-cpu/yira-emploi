@@ -9,18 +9,28 @@ datasource db {
 }
 
 model Jeune {
-  id                String   @id @default(cuid())
-  nom               String
-  prenom            String
-  telephone         String   @unique
-  email             String?
-  niveau            String?
-  district          String?
-  codeYira          String?  @unique
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  testsSigmund      TestSigmund[]
-  paiements         Paiement[]
+  id                  String   @id @default(cuid())
+  nom                 String
+  prenom              String
+  telephone           String   @unique
+  email               String?
+  dateNaissance       DateTime?
+  genre               String?    // "M", "F"
+  niveau              String?
+  specialite          String?
+  situationActuelle   String?    // "NEET", "EMPLOYE", "ETUDIANT", "AUTRE"
+  district            String?
+  commune             String?
+  quartier            String?
+  zoneGeo             String?    // "urbain", "periurbain", "rural"
+  canalPrefere        String?    // "sms", "whatsapp", "appel"
+  consentementRGPD    Boolean    @default(false)
+  codeYira            String?    @unique
+  statutParcours      String     @default("INSCRIT") // INSCRIT, EN_EVALUATION, EVALUE, EN_FORMATION, CERTIFIE, INSERE
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  testsSigmund        TestSigmund[]
+  paiements           Paiement[]
 }
 
 model TestSigmund {

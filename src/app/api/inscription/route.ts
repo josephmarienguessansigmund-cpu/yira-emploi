@@ -1,19 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
+import { genererCodeYira } from '@/lib/yira-code';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { prenom, nom, telephone, email, niveau, district } = body;
+    const {
+      prenom, nom, telephone, email,
+      dateNaissance, genre, niveau, specialite,
+      situationActuelle, district, commune, quartier,
+      zoneGeo, canalPrefere, consentementRGPD,
+    } = body;
 
-    if (!prenom || !nom || !telephone || !niveau || !district) {
+    // Validation champs obligatoires
+    if (!prenom || !nom || !telephone || !niveau || !district || !dateNaissance || !genre) {
       return NextResponse.json(
-        { error: 'Prénom, nom, téléphone, niveau et district sont requis' },
+        { error: 'Prénom, nom, téléphone, date de naissance, genre, niveau et district sont requis.' },
         { status: 400 }
       );
     }
 
-    // Normalize phone number
+    if (!consentementRGPD) {
+      return NextResponse.json(
+        { error: 'Vous devez accepter le consentement pour le traitement de vos données.' },
+        { status: 400 }
+      );
+    }
+
+    // Normaliser le numéro de téléphone
     let phone = telephone.replace(/[\s-]/g, '');
     if (phone.startsWith('0') && phone.length === 10) {
       phone = '+225' + phone.substring(1);
@@ -21,7 +35,7 @@ export async function POST(req: NextRequest) {
       phone = '+225' + phone;
     }
 
-    // Check if already registered
+    // Vérifier si déjà inscrit
     const existing = await prisma.jeune.findUnique({
       where: { telephone: phone },
     });
@@ -33,26 +47,44 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create the profile
+    // Générer le code YIRA unique
+    const codeYira = await genererCodeYira();
+
+    // Créer le profil
     const jeune = await prisma.jeune.create({
       data: {
         prenom,
         nom,
         telephone: phone,
         email: email || null,
+        dateNaissance: new Date(dateNaissance),
+        genre,
         niveau,
+        specialite: specialite || null,
+        situationActuelle: situationActuelle || null,
         district,
+        commune: commune || null,
+        quartier: quartier || null,
+        zoneGeo: zoneGeo || null,
+        canalPrefere: canalPrefere || null,
+        consentementRGPD: Boolean(consentementRGPD),
+        codeYira,
       },
     });
 
     return NextResponse.json({
       success: true,
-      data: { id: jeune.id, prenom: jeune.prenom, nom: jeune.nom },
+      data: {
+        id: jeune.id,
+        prenom: jeune.prenom,
+        nom: jeune.nom,
+        codeYira: jeune.codeYira,
+      },
     });
   } catch (error) {
     console.error('[API/Inscription] Erreur:', error);
     return NextResponse.json(
-      { error: 'Erreur lors de l\'inscription. Veuillez réessayer.' },
+      { error: "Erreur lors de l'inscription. Veuillez réessayer." },
       { status: 500 }
     );
   }
