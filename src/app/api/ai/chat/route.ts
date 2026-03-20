@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     let contextData = '';
     if (beneficiaireId) {
-      const beneficiaire = await prisma.jeune.findUnique({
+      const beneficiaire = await prisma.talent.findUnique({
         where: { id: beneficiaireId },
         include: { testsSigmund: true },
       });
