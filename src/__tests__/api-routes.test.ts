@@ -6,7 +6,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock Prisma
 const mockPrisma = {
-  jeune: {
+  talent: {
     findUnique: vi.fn(),
     findFirst: vi.fn(),
     create: vi.fn(),
@@ -93,7 +93,7 @@ describe('API Routes', () => {
     it('refuse si téléphone déjà inscrit (409)', async () => {
       const { POST } = await import('@/app/api/inscription/route');
 
-      mockPrisma.jeune.findUnique.mockResolvedValueOnce({ id: 'existing' });
+      mockPrisma.talent.findUnique.mockResolvedValueOnce({ id: 'existing' });
 
       const req = createJsonRequest('http://localhost/api/inscription', {
         prenom: 'Amadou',
@@ -113,8 +113,8 @@ describe('API Routes', () => {
     it('inscription réussie avec code YIRA', async () => {
       const { POST } = await import('@/app/api/inscription/route');
 
-      mockPrisma.jeune.findUnique.mockResolvedValueOnce(null);
-      mockPrisma.jeune.create.mockResolvedValueOnce({
+      mockPrisma.talent.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.talent.create.mockResolvedValueOnce({
         id: 'new-id',
         prenom: 'Amadou',
         nom: 'Koné',
@@ -149,8 +149,8 @@ describe('API Routes', () => {
     it('normalise le téléphone 0XXXXXXXXX → +225XXXXXXXXX', async () => {
       const { POST } = await import('@/app/api/inscription/route');
 
-      mockPrisma.jeune.findUnique.mockResolvedValueOnce(null);
-      mockPrisma.jeune.create.mockResolvedValueOnce({
+      mockPrisma.talent.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.talent.create.mockResolvedValueOnce({
         id: 'id',
         prenom: 'Test',
         nom: 'User',
@@ -170,7 +170,7 @@ describe('API Routes', () => {
 
       await POST(req as any);
 
-      expect(mockPrisma.jeune.findUnique).toHaveBeenCalledWith({
+      expect(mockPrisma.talent.findUnique).toHaveBeenCalledWith({
         where: { telephone: '+225701020304' },
       });
     });
@@ -189,7 +189,7 @@ describe('API Routes', () => {
 
     it('retourne 404 si candidat non trouvé', async () => {
       const { GET } = await import('@/app/api/candidat/route');
-      mockPrisma.jeune.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.talent.findUnique.mockResolvedValueOnce(null);
 
       const req = new Request('http://localhost/api/candidat?telephone=0701020304');
       const response = await GET(req as any);
@@ -198,7 +198,7 @@ describe('API Routes', () => {
 
     it('retourne le candidat trouvé', async () => {
       const { GET } = await import('@/app/api/candidat/route');
-      mockPrisma.jeune.findUnique.mockResolvedValueOnce({
+      mockPrisma.talent.findUnique.mockResolvedValueOnce({
         id: 'c1',
         prenom: 'Amadou',
         nom: 'Koné',

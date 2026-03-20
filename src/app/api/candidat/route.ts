@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
       phone = '+225' + phone;
     }
 
-    // 2. Recherche du Talent (Anciennement Jeune)
+    // 2. Recherche du Talent (Anciennement Talent)
     const talent = await prisma.talent.findUnique({
       where: { telephone: phone },
       select: { id: true, prenom: true, nom: true },

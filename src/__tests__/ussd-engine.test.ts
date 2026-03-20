@@ -10,7 +10,7 @@ const mockUpsert = vi.fn();
 
 vi.mock('@/lib/db', () => ({
   default: {
-    jeune: {
+    talent: {
       findUnique: (...args: unknown[]) => mockFindUnique(...args),
       upsert: (...args: unknown[]) => mockUpsert(...args),
     },
@@ -73,7 +73,7 @@ describe('USSD Engine — handleUSSD', () => {
 
     it('choix 3 → résultats SIGMUND (test complété)', async () => {
       mockFindUnique.mockResolvedValueOnce({
-        id: 'jeune-1',
+        id: 'talent-1',
         telephone: '+2250701020304',
         testsSigmund: [{
           completedAt: new Date(),
@@ -93,7 +93,7 @@ describe('USSD Engine — handleUSSD', () => {
 
     it('choix 3 → résultats SIGMUND (test en cours)', async () => {
       mockFindUnique.mockResolvedValueOnce({
-        id: 'jeune-1',
+        id: 'talent-1',
         telephone: '+2250701020304',
         testsSigmund: [{
           completedAt: null,
@@ -144,14 +144,14 @@ describe('USSD Engine — handleUSSD', () => {
       expect(step5.continueSession).toBe(true);
       expect(step5.response).toContain('région');
 
-      // Mock prisma.jeune.upsert for saving
-      mockUpsert.mockResolvedValueOnce({ id: 'new-jeune' });
+      // Mock prisma.talent.upsert for saving
+      mockUpsert.mockResolvedValueOnce({ id: 'new-talent' });
       const step6 = await handleUSSD(makeSession({ sessionId, text: '1*Amadou*Koné*3*3*1' }));
       expect(step6.continueSession).toBe(false);
       expect(step6.response).toContain('Inscription réussie');
       expect(step6.response).toContain('Amadou');
 
-      // Verify prisma.jeune.upsert was called
+      // Verify prisma.talent.upsert was called
       expect(mockUpsert).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { telephone: '+2250701020304' },

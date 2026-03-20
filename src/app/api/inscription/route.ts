@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Vérifier si déjà inscrit
-    const existing = await prisma.jeune.findUnique({
+    const existing = await prisma.talent.findUnique({
       where: { telephone: phone },
     });
 
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     const codeYira = await genererCodeYira();
 
     // Créer le profil
-    const jeune = await prisma.jeune.create({
+    const talent = await prisma.talent.create({
       data: {
         prenom,
         nom,
@@ -77,10 +77,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        id: jeune.id,
-        prenom: jeune.prenom,
-        nom: jeune.nom,
-        codeYira: jeune.codeYira,
+        id: talent.id,
+        prenom: talent.prenom,
+        nom: talent.nom,
+        codeYira: talent.codeYira,
       },
     });
   } catch (error) {

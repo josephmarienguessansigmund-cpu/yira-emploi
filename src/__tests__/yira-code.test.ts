@@ -6,7 +6,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // Mock Prisma
 vi.mock('@/lib/db', () => ({
   default: {
-    jeune: {
+    talent: {
       findFirst: vi.fn(),
     },
   },
@@ -15,7 +15,7 @@ vi.mock('@/lib/db', () => ({
 import { genererCodeYira } from '@/lib/yira-code';
 import prisma from '@/lib/db';
 
-const mockFindFirst = vi.mocked(prisma.jeune.findFirst);
+const mockFindFirst = vi.mocked(prisma.talent.findFirst);
 
 describe('genererCodeYira', () => {
   beforeEach(() => {

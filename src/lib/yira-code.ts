@@ -9,7 +9,7 @@ export async function genererCodeYira(): Promise<string> {
   const prefix = `YIR-${annee}-`;
 
   // Trouver le dernier code YIRA de l'année en cours
-  const dernier = await prisma.jeune.findFirst({
+  const dernier = await prisma.talent.findFirst({
     where: { codeYira: { startsWith: prefix } },
     orderBy: { codeYira: 'desc' },
     select: { codeYira: true },

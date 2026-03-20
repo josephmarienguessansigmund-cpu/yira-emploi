@@ -33,17 +33,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'phoneNumber manquant' }, { status: 400 });
     }
 
-    const jeune = await prisma.jeune.findUnique({
+    const talent = await prisma.talent.findUnique({
       where: { telephone: phoneNumber },
       include: { paiements: { orderBy: { createdAt: 'desc' }, take: 1 } },
     });
 
-    if (!jeune || jeune.paiements.length === 0) {
-      console.warn(`[Payment] Aucun jeune/paiement trouvé pour ${phoneNumber}`);
+    if (!talent || talent.paiements.length === 0) {
+      console.warn(`[Payment] Aucun talent/paiement trouvé pour ${phoneNumber}`);
       return NextResponse.json({ received: true });
     }
 
-    const paiement = jeune.paiements[0];
+    const paiement = talent.paiements[0];
     const montant = parseFloat(value?.replace(/[^0-9.]/g, '') || '0');
 
     await prisma.paiement.update({

@@ -27,8 +27,8 @@ export type USSDStep =
   | "OFFRES"
   | "FIN";
 
-// Profil jeune collecté via USSD
-export type ProfilJeune = {
+// Profil talent collecté via USSD
+export type ProfilTalent = {
   telephone: string;
   prenom?: string;
   nom?: string;

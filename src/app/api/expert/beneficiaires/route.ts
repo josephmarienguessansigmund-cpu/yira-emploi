@@ -18,21 +18,21 @@ export async function GET(req: NextRequest) {
       : {
           completedAt: { not: null },
           estValideParExpert: false,
-          jeune: { assignedExpertId: profile.id },
+          talent: { assignedExpertId: profile.id },
         };
 
     const tests = await prisma.testSigmund.findMany({
       where: whereClause,
-      include: { jeune: true },
+      include: { talent: true },
       orderBy: { completedAt: 'desc' },
     });
 
     const beneficiaires = isAdmin
-      ? await prisma.jeune.findMany({
+      ? await prisma.talent.findMany({
           include: { testsSigmund: true },
           orderBy: { createdAt: 'desc' },
         })
-      : await prisma.jeune.findMany({
+      : await prisma.talent.findMany({
           where: { assignedExpertId: profile.id },
           include: { testsSigmund: true },
           orderBy: { createdAt: 'desc' },

@@ -119,7 +119,7 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div>
               <p className="text-4xl font-bold">25 000</p>
-              <p className="text-green-200 text-sm mt-1">Jeunes par an</p>
+              <p className="text-green-200 text-sm mt-1">Talents par an</p>
             </div>
             <div>
               <p className="text-4xl font-bold">14</p>

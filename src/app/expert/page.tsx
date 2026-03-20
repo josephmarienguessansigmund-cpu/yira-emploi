@@ -24,7 +24,7 @@ type Beneficiaire = {
 type TestEnAttente = {
   id: string;
   completedAt: string | null;
-  jeune: {
+  talent: {
     prenom: string;
     nom: string;
     codeYira: string | null;
@@ -216,13 +216,13 @@ export default function ExpertDashboard() {
                       <User className="text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg">{test.jeune.prenom} {test.jeune.nom}</h3>
+                      <h3 className="font-bold text-lg">{test.talent.prenom} {test.talent.nom}</h3>
                       <div className="flex gap-4 text-sm text-slate-500">
-                        {test.jeune.codeYira && (
-                          <span className="font-mono text-green-600">{test.jeune.codeYira}</span>
+                        {test.talent.codeYira && (
+                          <span className="font-mono text-green-600">{test.talent.codeYira}</span>
                         )}
-                        <span>{test.jeune.niveau || ''}</span>
-                        <span>{test.jeune.district || ''}</span>
+                        <span>{test.talent.niveau || ''}</span>
+                        <span>{test.talent.district || ''}</span>
                         <span className="flex items-center gap-1">
                           <Clock size={14} /> {test.completedAt ? new Date(test.completedAt).toLocaleDateString() : ''}
                         </span>

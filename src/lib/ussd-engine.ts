@@ -2,7 +2,7 @@
 // lib/ussd-engine.ts — Machine à états pour le menu USSD
 // Compatible Africa's Talking / MTN CI / Orange CI
 // ============================================================
-import type { USSDSession, USSDResponse, ProfilJeune } from "@/types";
+import type { USSDSession, USSDResponse, ProfilTalent } from "@/types";
 import prisma from "./db";
 
 // Store en mémoire pour sessions courtes (< 3min)
@@ -173,7 +173,7 @@ async function handleInscription(
     }
 
     // Sauvegarder en base
-    const profil: ProfilJeune = {
+    const profil: ProfilTalent = {
       telephone: phone,
       prenom: state.prenom,
       nom: state.nom,
@@ -220,7 +220,7 @@ async function menuOffres(): Promise<USSDResponse> {
 // -------------------------------------------------------
 async function menuResultats(phone: string): Promise<USSDResponse> {
   try {
-    const jeune = await prisma.jeune.findUnique({
+    const talent = await prisma.talent.findUnique({
       where: { telephone: phone },
       include: {
         testsSigmund: {
@@ -230,14 +230,14 @@ async function menuResultats(phone: string): Promise<USSDResponse> {
       },
     });
 
-    if (!jeune) {
+    if (!talent) {
       return {
         continueSession: false,
         response: "Aucun profil trouvé.\nInscrivez-vous d'abord : *789# > 1",
       };
     }
 
-    if (jeune.testsSigmund.length === 0) {
+    if (talent.testsSigmund.length === 0) {
       return {
         continueSession: false,
         response:
@@ -245,7 +245,7 @@ async function menuResultats(phone: string): Promise<USSDResponse> {
       };
     }
 
-    const test = jeune.testsSigmund[0];
+    const test = talent.testsSigmund[0];
 
     if (!test.completedAt) {
       return {
@@ -286,10 +286,10 @@ async function menuResultats(phone: string): Promise<USSDResponse> {
 }
 
 // -------------------------------------------------------
-// Persistence en base — using Prisma Jeune model
+// Persistence en base — using Prisma Talent model
 // -------------------------------------------------------
-async function sauvegarderProfil(profil: ProfilJeune): Promise<void> {
-  await prisma.jeune.upsert({
+async function sauvegarderProfil(profil: ProfilTalent): Promise<void> {
+  await prisma.talent.upsert({
     where: { telephone: profil.telephone },
     create: {
       telephone: profil.telephone,

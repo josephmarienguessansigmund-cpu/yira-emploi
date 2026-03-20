@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   try {
     const { messages, beneficiaireId } = await req.json();
 
-    // 1. Récupération des données du Talent (anciennement Jeune)
+    // 1. Récupération des données du Talent (anciennement Talent)
     let contextData = '';
     if (beneficiaireId) {
       const beneficiaire = await prisma.talent.findUnique({
