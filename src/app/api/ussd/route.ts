@@ -7,6 +7,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { handleUSSD } from "@/lib/ussd-engine";
 import type { USSDSession } from "@/types";
 
+export const dynamic = 'force-dynamic';
+
 // Africa's Talking envoie via POST form-urlencoded
 // Orange/MTN CI peuvent envoyer via GET ou POST JSON
 export async function POST(req: NextRequest): Promise<NextResponse> {

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { creerSessionEvaluation } from '@/lib/sigmund';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();

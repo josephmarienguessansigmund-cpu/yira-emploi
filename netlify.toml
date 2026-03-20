@@ -9,12 +9,6 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Redirections pour les routes API Next.js
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/___netlify-handler"
-  status = 200
-
 # Headers de sécurité
 [[headers]]
   for = "/*"

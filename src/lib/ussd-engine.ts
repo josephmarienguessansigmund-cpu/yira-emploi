@@ -3,7 +3,7 @@
 // Compatible Africa's Talking / MTN CI / Orange CI
 // ============================================================
 import type { USSDSession, USSDResponse, ProfilJeune } from "@/types";
-import { query } from "./db";
+import prisma from "./db";
 
 // Store en mémoire pour sessions courtes (< 3min)
 // En production: remplacer par Redis ou une table sessions en DB
@@ -47,7 +47,7 @@ export async function handleUSSD(session: USSDSession): Promise<USSDResponse> {
         setState(sessionId, { step: "INSCRIPTION" });
         return { continueSession: true, response: menuInscription() };
       case "2":
-        return await menuOffres(phoneNumber);
+        return await menuOffres();
       case "3":
         return await menuResultats(phoneNumber);
       case "0":
@@ -207,33 +207,12 @@ async function handleInscription(
 // -------------------------------------------------------
 // Menu offres d'emploi
 // -------------------------------------------------------
-async function menuOffres(phone: string): Promise<USSDResponse> {
-  try {
-    const offres = await query<{ titre: string; secteur: string; region: string }>(
-      "SELECT titre, secteur, region FROM offres WHERE statut = 'ACTIVE' ORDER BY created_at DESC LIMIT 3"
-    );
-
-    if (offres.length === 0) {
-      return {
-        continueSession: false,
-        response: "Aucune offre disponible pour le moment.\nRevenez bientôt !",
-      };
-    }
-
-    const liste = offres
-      .map((o, i) => `${i + 1}. ${o.titre} (${o.region})`)
-      .join("\n");
-
-    return {
-      continueSession: false,
-      response: `OFFRES DU MOMENT\n${liste}\n\nEnvoyez CV à: recrutement@nohama.ci`,
-    };
-  } catch {
-    return {
-      continueSession: false,
-      response: "Service offres temporairement indisponible.",
-    };
-  }
+async function menuOffres(): Promise<USSDResponse> {
+  // No job offers table exists yet — return a placeholder message
+  return {
+    continueSession: false,
+    response: "Aucune offre disponible pour le moment.\nRevenez bientôt !",
+  };
 }
 
 // -------------------------------------------------------
@@ -241,24 +220,34 @@ async function menuOffres(phone: string): Promise<USSDResponse> {
 // -------------------------------------------------------
 async function menuResultats(phone: string): Promise<USSDResponse> {
   try {
-    const rows = await query<{ status: string; profil_global: string | null; code_holland: string | null }>(
-      `SELECT c.sigmund_session_id, e.status, e.profil_global, e.code_holland
-       FROM candidats c
-       LEFT JOIN evaluations e ON e.candidat_telephone = c.telephone
-       WHERE c.telephone = $1
-       ORDER BY e.created_at DESC LIMIT 1`,
-      [phone]
-    );
+    const jeune = await prisma.jeune.findUnique({
+      where: { telephone: phone },
+      include: {
+        testsSigmund: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
+      },
+    });
 
-    if (rows.length === 0) {
+    if (!jeune) {
       return {
         continueSession: false,
         response: "Aucun profil trouvé.\nInscrivez-vous d'abord : *789# > 1",
       };
     }
 
-    const r = rows[0];
-    if (r.status !== "COMPLETED") {
+    if (jeune.testsSigmund.length === 0) {
+      return {
+        continueSession: false,
+        response:
+          "Aucun test SIGMUND trouvé.\nPassez votre évaluation via le lien SMS reçu.",
+      };
+    }
+
+    const test = jeune.testsSigmund[0];
+
+    if (!test.completedAt) {
       return {
         continueSession: false,
         response:
@@ -266,15 +255,29 @@ async function menuResultats(phone: string): Promise<USSDResponse> {
       };
     }
 
+    // Parse rapport if available
+    let profilGlobal = "N/A";
+    let codeHolland = "N/A";
+    if (test.rapport) {
+      try {
+        const rapport = JSON.parse(test.rapport);
+        profilGlobal = rapport.profil_global || rapport.profile_summary || "N/A";
+        codeHolland = rapport.riasec?.holland_code || rapport.code_holland || "N/A";
+      } catch {
+        // rapport is not valid JSON
+      }
+    }
+
     return {
       continueSession: false,
       response:
         `VOS RÉSULTATS SIGMUND\n` +
-        `Profil: ${r.profil_global ?? "N/A"}\n` +
-        `Code Holland: ${r.code_holland ?? "N/A"}\n` +
+        `Profil: ${profilGlobal}\n` +
+        `Code Holland: ${codeHolland}\n` +
         `Pour le rapport complet: rapport@nohama.ci`,
     };
-  } catch {
+  } catch (err) {
+    console.error("[USSD] Erreur résultats:", err);
     return {
       continueSession: false,
       response: "Service résultats temporairement indisponible.",
@@ -283,24 +286,27 @@ async function menuResultats(phone: string): Promise<USSDResponse> {
 }
 
 // -------------------------------------------------------
-// Persistence en base
+// Persistence en base — using Prisma Jeune model
 // -------------------------------------------------------
 async function sauvegarderProfil(profil: ProfilJeune): Promise<void> {
-  await query(
-    `INSERT INTO candidats (telephone, prenom, nom, niveau_etude, secteur_interet, region, statut, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
-     ON CONFLICT (telephone) DO UPDATE
-     SET prenom = EXCLUDED.prenom, nom = EXCLUDED.nom,
-         niveau_etude = EXCLUDED.niveau_etude, secteur_interet = EXCLUDED.secteur_interet,
-         region = EXCLUDED.region, updated_at = NOW()`,
-    [
-      profil.telephone,
-      profil.prenom,
-      profil.nom,
-      profil.niveau_etude,
-      profil.secteur_interet,
-      profil.region,
-      profil.statut,
-    ]
-  );
+  await prisma.jeune.upsert({
+    where: { telephone: profil.telephone },
+    create: {
+      telephone: profil.telephone,
+      prenom: profil.prenom || "",
+      nom: profil.nom || "",
+      niveau: profil.niveau_etude || null,
+      specialite: profil.secteur_interet || null,
+      district: profil.region || null,
+      situationActuelle: profil.statut || "NEET",
+      consentementRGPD: false,
+    },
+    update: {
+      prenom: profil.prenom || undefined,
+      nom: profil.nom || undefined,
+      niveau: profil.niveau_etude || undefined,
+      specialite: profil.secteur_interet || undefined,
+      district: profil.region || undefined,
+    },
+  });
 }

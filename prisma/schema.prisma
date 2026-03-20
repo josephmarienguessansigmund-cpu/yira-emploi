@@ -5,7 +5,23 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model YiraExpert {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  nom           String
+  prenom        String?
+  pays          String?
+  role          String   @default("expert") // admin, expert, candidate
+  tokensCount   Int      @default(10) @map("tokens_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  beneficiaires Jeune[]
+
+  @@map("YiraExpert")
 }
 
 model Jeune {
@@ -27,6 +43,8 @@ model Jeune {
   consentementRGPD    Boolean    @default(false)
   codeYira            String?    @unique
   statutParcours      String     @default("INSCRIT") // INSCRIT, EN_EVALUATION, EVALUE, EN_FORMATION, CERTIFIE, INSERE
+  assignedExpertId    String?    @map("assigned_expert_id")
+  assignedExpert      YiraExpert? @relation(fields: [assignedExpertId], references: [id])
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
   testsSigmund        TestSigmund[]

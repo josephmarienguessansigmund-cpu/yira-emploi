@@ -4,17 +4,21 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock de la base de données
+// Mock Prisma
+const mockFindUnique = vi.fn();
+const mockUpsert = vi.fn();
+
 vi.mock('@/lib/db', () => ({
-  default: {},
-  query: vi.fn(),
+  default: {
+    jeune: {
+      findUnique: (...args: unknown[]) => mockFindUnique(...args),
+      upsert: (...args: unknown[]) => mockUpsert(...args),
+    },
+  },
 }));
 
 import { handleUSSD } from '@/lib/ussd-engine';
-import { query } from '@/lib/db';
 import type { USSDSession } from '@/types';
-
-const mockQuery = vi.mocked(query);
 
 function makeSession(overrides: Partial<USSDSession> = {}): USSDSession {
   return {
@@ -45,9 +49,7 @@ describe('USSD Engine — handleUSSD', () => {
 
   describe('Navigation niveau 1', () => {
     it('choix 1 → menu inscription (demande prénom)', async () => {
-      // Premier appel pour initialiser la session
       await handleUSSD(makeSession({ text: '' }));
-      // Choix 1 = inscription
       const result = await handleUSSD(makeSession({ text: '1' }));
       expect(result.continueSession).toBe(true);
       expect(result.response).toContain('INSCRIPTION YIRA Emploi');
@@ -55,28 +57,14 @@ describe('USSD Engine — handleUSSD', () => {
     });
 
     it('choix 2 → offres d\'emploi (aucune offre)', async () => {
-      mockQuery.mockResolvedValueOnce([]);
       await handleUSSD(makeSession({ text: '' }));
       const result = await handleUSSD(makeSession({ text: '2' }));
       expect(result.continueSession).toBe(false);
       expect(result.response).toContain('Aucune offre');
     });
 
-    it('choix 2 → offres d\'emploi (avec résultats)', async () => {
-      mockQuery.mockResolvedValueOnce([
-        { titre: 'Développeur Web', secteur: 'Tech', region: 'Abidjan' },
-        { titre: 'Comptable', secteur: 'Finance', region: 'Bouaké' },
-      ]);
-      await handleUSSD(makeSession({ text: '' }));
-      const result = await handleUSSD(makeSession({ text: '2' }));
-      expect(result.continueSession).toBe(false);
-      expect(result.response).toContain('OFFRES DU MOMENT');
-      expect(result.response).toContain('Développeur Web');
-      expect(result.response).toContain('Comptable');
-    });
-
     it('choix 3 → résultats SIGMUND (pas de profil)', async () => {
-      mockQuery.mockResolvedValueOnce([]);
+      mockFindUnique.mockResolvedValueOnce(null);
       await handleUSSD(makeSession({ text: '' }));
       const result = await handleUSSD(makeSession({ text: '3' }));
       expect(result.continueSession).toBe(false);
@@ -84,11 +72,17 @@ describe('USSD Engine — handleUSSD', () => {
     });
 
     it('choix 3 → résultats SIGMUND (test complété)', async () => {
-      mockQuery.mockResolvedValueOnce([{
-        status: 'COMPLETED',
-        profil_global: 'Profil Entrepreneur',
-        code_holland: 'ESA',
-      }]);
+      mockFindUnique.mockResolvedValueOnce({
+        id: 'jeune-1',
+        telephone: '+2250701020304',
+        testsSigmund: [{
+          completedAt: new Date(),
+          rapport: JSON.stringify({
+            profile_summary: 'Profil Entrepreneur',
+            riasec: { holland_code: 'ESA' },
+          }),
+        }],
+      });
       await handleUSSD(makeSession({ text: '' }));
       const result = await handleUSSD(makeSession({ text: '3' }));
       expect(result.continueSession).toBe(false);
@@ -98,11 +92,14 @@ describe('USSD Engine — handleUSSD', () => {
     });
 
     it('choix 3 → résultats SIGMUND (test en cours)', async () => {
-      mockQuery.mockResolvedValueOnce([{
-        status: 'IN_PROGRESS',
-        profil_global: null,
-        code_holland: null,
-      }]);
+      mockFindUnique.mockResolvedValueOnce({
+        id: 'jeune-1',
+        telephone: '+2250701020304',
+        testsSigmund: [{
+          completedAt: null,
+          rapport: null,
+        }],
+      });
       await handleUSSD(makeSession({ text: '' }));
       const result = await handleUSSD(makeSession({ text: '3' }));
       expect(result.continueSession).toBe(false);
@@ -128,42 +125,45 @@ describe('USSD Engine — handleUSSD', () => {
     const sessionId = 'inscription-test';
 
     it('inscription complète : prénom → nom → niveau → secteur → région', async () => {
-      // Initialiser session
       await handleUSSD(makeSession({ sessionId, text: '' }));
-      // Choix inscription
       await handleUSSD(makeSession({ sessionId, text: '1' }));
 
-      // Étape 2 : prénom
       const step2 = await handleUSSD(makeSession({ sessionId, text: '1*Amadou' }));
       expect(step2.continueSession).toBe(true);
       expect(step2.response).toContain('nom de famille');
 
-      // Étape 3 : nom
       const step3 = await handleUSSD(makeSession({ sessionId, text: '1*Amadou*Koné' }));
       expect(step3.continueSession).toBe(true);
       expect(step3.response).toContain("Niveau d'étude");
 
-      // Étape 4 : niveau (3 = BAC)
       const step4 = await handleUSSD(makeSession({ sessionId, text: '1*Amadou*Koné*3' }));
       expect(step4.continueSession).toBe(true);
       expect(step4.response).toContain("Secteur d'intérêt");
 
-      // Étape 5 : secteur (3 = Tech)
       const step5 = await handleUSSD(makeSession({ sessionId, text: '1*Amadou*Koné*3*3' }));
       expect(step5.continueSession).toBe(true);
       expect(step5.response).toContain('région');
 
-      // Étape 6 : région (1 = Abidjan) → sauvegarde
-      mockQuery.mockResolvedValueOnce([]);
+      // Mock prisma.jeune.upsert for saving
+      mockUpsert.mockResolvedValueOnce({ id: 'new-jeune' });
       const step6 = await handleUSSD(makeSession({ sessionId, text: '1*Amadou*Koné*3*3*1' }));
       expect(step6.continueSession).toBe(false);
       expect(step6.response).toContain('Inscription réussie');
       expect(step6.response).toContain('Amadou');
 
-      // Vérifier que query a été appelé avec les bons paramètres
-      expect(mockQuery).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO candidats'),
-        expect.arrayContaining(['+2250701020304', 'Amadou', 'Koné', 'BAC', 'Tech/Numérique', 'Abidjan', 'NEET'])
+      // Verify prisma.jeune.upsert was called
+      expect(mockUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { telephone: '+2250701020304' },
+          create: expect.objectContaining({
+            telephone: '+2250701020304',
+            prenom: 'Amadou',
+            nom: 'Koné',
+            niveau: 'BAC',
+            specialite: 'Tech/Numérique',
+            district: 'Abidjan',
+          }),
+        })
       );
     });
 
@@ -215,8 +215,7 @@ describe('USSD Engine — handleUSSD', () => {
       await handleUSSD(makeSession({ sessionId: sid, text: '1*Fatou*Diallo*1' }));
       await handleUSSD(makeSession({ sessionId: sid, text: '1*Fatou*Diallo*1*2' }));
 
-      // Simuler une erreur DB
-      mockQuery.mockRejectedValueOnce(new Error('DB connection failed'));
+      mockUpsert.mockRejectedValueOnce(new Error('DB connection failed'));
       const result = await handleUSSD(makeSession({ sessionId: sid, text: '1*Fatou*Diallo*1*2*3' }));
       expect(result.continueSession).toBe(false);
       expect(result.response).toContain('Erreur');

@@ -63,6 +63,33 @@ CREATE TABLE IF NOT EXISTS offres (
 );
 
 -- -------------------------------------------------------
+-- Table YiraExpert
+-- -------------------------------------------------------
+CREATE TABLE IF NOT EXISTS "YiraExpert" (
+    id              UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    email           VARCHAR(255) UNIQUE NOT NULL,
+    nom             VARCHAR(100) NOT NULL,
+    prenom          VARCHAR(100),
+    pays            VARCHAR(100),
+    role            VARCHAR(20) DEFAULT 'expert'
+                    CHECK (role IN ('admin', 'expert', 'candidate')),
+    tokens_count    INT DEFAULT 10,
+    created_at      TIMESTAMPTZ DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Add assigned_expert_id to candidats if not exists
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_name = 'candidats' AND column_name = 'assigned_expert_id') THEN
+        ALTER TABLE candidats ADD COLUMN assigned_expert_id UUID REFERENCES "YiraExpert"(id);
+    END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_expert_email ON "YiraExpert"(email);
+CREATE INDEX IF NOT EXISTS idx_candidats_expert ON candidats(assigned_expert_id);
+
+-- -------------------------------------------------------
 -- Index de performance
 -- -------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_candidats_telephone ON candidats(telephone);
