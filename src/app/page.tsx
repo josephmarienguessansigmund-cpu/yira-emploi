@@ -61,7 +61,7 @@ export default function HomePage() {
             </div>
             <h3 className="font-bold text-lg mb-2">Acc&egrave;s Multi-Canal</h3>
             <p className="text-slate-600 text-sm">
-              Inscription et suivi via Web, USSD (*7572#) et SMS depuis n&apos;importe quel t&eacute;l&eacute;phone.
+              Inscription et suivi via Web, USSD (*789#) et SMS depuis n&apos;importe quel t&eacute;l&eacute;phone.
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border text-center">
