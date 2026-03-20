@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Normalize phone number
+    // Normalisation du numéro (Format Côte d'Ivoire +225)
     let phone = telephone.replace(/[\s-]/g, '');
     if (phone.startsWith('0') && phone.length === 10) {
       phone = '+225' + phone.substring(1);
@@ -23,19 +23,23 @@ export async function GET(req: NextRequest) {
       phone = '+225' + phone;
     }
 
-    const jeune = await prisma.jeune.findUnique({
+    // Recherche dans la table 'talent' (et non 'jeune')
+    const talent = await prisma.talent.findUnique({
       where: { telephone: phone },
       select: { id: true, prenom: true, nom: true },
     });
 
-    if (!jeune) {
+    // Utilisation du "!" (SI le talent n'existe pas)
+    if (!talent) {
       return NextResponse.json(
-        { error: 'Aucun profil trouvé avec ce numéro. Veuillez vous inscrire d\'abord.' },
+        { error: "Aucun profil trouvé avec ce numéro. Veuillez vous inscrire d'abord sur YIRA." },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, data: jeune });
+    // On renvoie bien la variable 'talent' ici
+    return NextResponse.json({ success: true, data: talent });
+
   } catch (error) {
     console.error('[API/Candidat] Erreur:', error);
     return NextResponse.json(
