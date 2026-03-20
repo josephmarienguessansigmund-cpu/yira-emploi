@@ -1,38 +1,37 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/db';
 
-const prisma = new PrismaClient();
+export const dynamic = 'force-dynamic';
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const { messages, beneficiaireId } = await req.json();
+    const { message, jeuneId } = await request.json();
 
-    // 1. Récupération des données du Talent (anciennement Talent)
-    let contextData = '';
-    if (beneficiaireId) {
-      const beneficiaire = await prisma.talent.findUnique({
-        where: { id: beneficiaireId },
-        include: { testsSigmund: true },
-      });
+    if (!message) {
+      return NextResponse.json({ error: 'Message requis' }, { status: 400 });
+    }
 
-      if (beneficiaire) {
-        contextData = `L'utilisateur s'appelle ${beneficiaire.prenom} ${beneficiaire.nom}. `;
-        if (beneficiaire.testsSigmund && beneficiaire.testsSigmund.length > 0) {
-          contextData += `Ses résultats de tests psychométriques sont : ${JSON.stringify(beneficiaire.testsSigmund)}. `;
+    let contexte = '';
+    if (jeuneId) {
+      try {
+        const jeune = await prisma.jeune.findUnique({
+          where: { id: jeuneId },
+          include: { testsSigmund: true }
+        });
+        if (jeune) {
+          contexte = `Jeune: ${jeune.nom} ${jeune.prenom}`;
         }
+      } catch (e) {
+        console.error('Erreur profil:', e);
       }
     }
 
-    // 2. Préparation de la réponse (Exemple simplifié pour le chat)
-    // Ici, vous pouvez ajouter votre logique d'appel à l'IA (OpenAI, Anthropic, etc.)
-    
-    return NextResponse.json({ 
-      message: "Analyse du profil Talent effectuée avec succès.",
-      context: contextData 
-    });
+    const reponse = `Bonjour ! Je suis l'assistant YIRA. Comment puis-je vous aider ?`;
+
+    return NextResponse.json({ reponse });
 
   } catch (error) {
-    console.error('Erreur dans l\'API Chat:', error);
-    return NextResponse.json({ error: 'Erreur lors de la génération de la réponse' }, { status: 500 });
+    console.error('Erreur chat IA:', error);
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
