@@ -1,31 +1,10 @@
 import { Users, ClipboardCheck, Briefcase, Phone, Shield, Award } from 'lucide-react';
+import Navigation from '@/components/Navigation';
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-green-700">YIRA Emploi</h1>
-            <p className="text-sm text-slate-500">Programme d&apos;insertion professionnelle — NOHAMA Consulting</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <a
-              href="/inscription"
-              className="bg-green-700 text-white px-5 py-2 rounded-lg font-medium hover:bg-green-800 transition-colors"
-            >
-              S&apos;inscrire
-            </a>
-            <a
-              href="/expert"
-              className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors"
-            >
-              Espace Expert
-            </a>
-          </div>
-        </div>
-      </header>
+      <Navigation />
 
       {/* Hero */}
       <section className="max-w-6xl mx-auto px-6 py-16 text-center">

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { UserPlus, ArrowLeft, ArrowRight, CheckCircle, AlertCircle, Copy, Check } from 'lucide-react';
+import { UserPlus, ArrowRight, ArrowLeft, CheckCircle, AlertCircle, Copy, Check } from 'lucide-react';
+import Navigation from '@/components/Navigation';
 
 // --- Constantes ---
 
@@ -186,22 +187,7 @@ export default function InscriptionPage() {
   // --- Formulaire multi-étapes ---
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-green-700">YIRA Emploi</h1>
-            <p className="text-sm text-slate-500">Plateforme d&apos;insertion professionnelle</p>
-          </div>
-          <a
-            href="/"
-            className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
-          >
-            <ArrowLeft size={18} />
-            Accueil
-          </a>
-        </div>
-      </header>
+      <Navigation />
 
       <main className="max-w-xl mx-auto px-6 py-8">
         <div className="bg-white rounded-2xl shadow-sm border p-8">

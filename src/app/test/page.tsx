@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ClipboardCheck, ArrowLeft, Search, Loader2, ExternalLink, AlertCircle } from 'lucide-react';
+import { ClipboardCheck, Search, Loader2, ExternalLink, AlertCircle, Eye } from 'lucide-react';
+import Navigation from '@/components/Navigation';
 
 type Step = 'lookup' | 'choose' | 'started';
 type TestType = 'BIG_FIVE' | 'RIASEC' | 'SOFT_SKILLS' | 'MOTIVATION' | 'COMPLET';
@@ -22,6 +23,7 @@ export default function TestPage() {
   const [testUrl, setTestUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isControlMode, setIsControlMode] = useState(false);
 
   async function handleLookup(e: React.FormEvent) {
     e.preventDefault();
@@ -36,6 +38,7 @@ export default function TestPage() {
       }
       const data = await res.json();
       setCandidat(data.data);
+      setIsControlMode(false);
       setStep('choose');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erreur inattendue');
@@ -44,8 +47,23 @@ export default function TestPage() {
     }
   }
 
+  function enterControlMode() {
+    setCandidat({ id: 'controle-demo', prenom: 'Visiteur', nom: '(Mode Contrôle)' });
+    setIsControlMode(true);
+    setError('');
+    setStep('choose');
+  }
+
   async function handleStartTest() {
     if (!candidat) return;
+
+    // En mode contrôle, simuler directement le lancement
+    if (isControlMode) {
+      setTestUrl('');
+      setStep('started');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -77,23 +95,17 @@ export default function TestPage() {
     }
   }
 
+  function resetToLookup() {
+    setStep('lookup');
+    setCandidat(null);
+    setIsControlMode(false);
+    setError('');
+    setTestUrl('');
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-green-700">YIRA Emploi</h1>
-            <p className="text-sm text-slate-500">Plateforme d&apos;insertion professionnelle</p>
-          </div>
-          <a
-            href="/"
-            className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
-          >
-            <ArrowLeft size={18} />
-            Accueil
-          </a>
-        </div>
-      </header>
+      <Navigation />
 
       <main className="max-w-xl mx-auto px-6 py-12">
         <div className="bg-white rounded-2xl shadow-sm border p-8">
@@ -148,6 +160,30 @@ export default function TestPage() {
                   {loading ? 'Recherche...' : 'Retrouver mon profil'}
                 </button>
               </form>
+
+              {/* Séparateur */}
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="bg-white px-4 text-slate-400">ou</span>
+                </div>
+              </div>
+
+              {/* Bouton Mode Contrôle */}
+              <button
+                type="button"
+                onClick={enterControlMode}
+                className="w-full bg-orange-50 border-2 border-orange-300 text-orange-700 py-3 rounded-lg font-medium hover:bg-orange-100 transition-colors flex items-center justify-center gap-2"
+              >
+                <Eye size={18} />
+                Continuer sans inscription (Mode Contrôle)
+              </button>
+              <p className="text-xs text-slate-400 mt-2 text-center">
+                Parcourez les menus et les écrans sans créer de compte.
+              </p>
+
               <p className="text-xs text-slate-400 mt-4 text-center">
                 Pas encore inscrit ?{' '}
                 <a href="/inscription" className="text-green-700 hover:underline">Créer un compte</a>
@@ -158,11 +194,15 @@ export default function TestPage() {
           {/* Step 2: Choose test type */}
           {step === 'choose' && candidat && (
             <>
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                <p className="text-green-800 font-medium">
-                  Bienvenue, {candidat.prenom} {candidat.nom} !
+              <div className={`${isControlMode ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-200'} border rounded-lg p-4 mb-6`}>
+                <p className={`${isControlMode ? 'text-orange-800' : 'text-green-800'} font-medium`}>
+                  {isControlMode ? 'Mode Contrôle' : `Bienvenue, ${candidat.prenom} ${candidat.nom} !`}
                 </p>
-                <p className="text-green-700 text-sm">Choisissez le type d&apos;évaluation à passer.</p>
+                <p className={`${isControlMode ? 'text-orange-700' : 'text-green-700'} text-sm`}>
+                  {isControlMode
+                    ? 'Vous naviguez librement. Aucune donnée ne sera enregistrée.'
+                    : "Choisissez le type d\u2019évaluation à passer."}
+                </p>
               </div>
 
               <div className="space-y-3 mb-6">
@@ -201,7 +241,15 @@ export default function TestPage() {
                 ) : (
                   <ClipboardCheck size={18} />
                 )}
-                {loading ? 'Lancement...' : 'Démarrer le test'}
+                {loading ? 'Lancement...' : isControlMode ? 'Simuler le lancement' : 'Démarrer le test'}
+              </button>
+
+              <button
+                type="button"
+                onClick={resetToLookup}
+                className="w-full mt-3 text-slate-500 hover:text-slate-700 text-sm py-2"
+              >
+                Retour
               </button>
             </>
           )}
@@ -212,14 +260,26 @@ export default function TestPage() {
               <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <ClipboardCheck className="text-green-700" size={36} />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Test lancé avec succès !</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">
+                {isControlMode ? 'Aperçu : Test lancé !' : 'Test lancé avec succès !'}
+              </h3>
               <p className="text-slate-600 mb-6">
-                Votre session d&apos;évaluation Sigmund a été créée.
-                {testUrl
-                  ? " Cliquez sur le bouton ci-dessous pour commencer."
-                  : " Vous recevrez un SMS avec le lien pour passer le test."}
+                {isControlMode ? (
+                  <>Voici l&apos;écran affiché après le lancement réel d&apos;un test. En production, le candidat recevrait un SMS ou un lien pour passer son évaluation Sigmund.</>
+                ) : testUrl ? (
+                  "Cliquez sur le bouton ci-dessous pour commencer."
+                ) : (
+                  "Vous recevrez un SMS avec le lien pour passer le test."
+                )}
               </p>
-              {testUrl && (
+
+              {isControlMode && (
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 text-sm text-orange-700">
+                  <strong>Mode Contrôle :</strong> Aucune session n&apos;a été créée. C&apos;est un aperçu du parcours utilisateur.
+                </div>
+              )}
+
+              {testUrl && !isControlMode && (
                 <a
                   href={testUrl}
                   target="_blank"
@@ -230,7 +290,13 @@ export default function TestPage() {
                   Passer le test maintenant
                 </a>
               )}
-              <div className="mt-6">
+              <div className="mt-6 flex flex-col items-center gap-2">
+                <button
+                  onClick={resetToLookup}
+                  className="text-green-700 hover:text-green-900 text-sm font-medium"
+                >
+                  Recommencer
+                </button>
                 <a href="/" className="text-slate-500 hover:text-slate-700 text-sm">
                   Retour à l&apos;accueil
                 </a>

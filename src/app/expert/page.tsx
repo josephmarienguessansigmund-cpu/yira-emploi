@@ -2,10 +2,11 @@ export const dynamic = 'force-dynamic';
 
 import prisma from '@/lib/db';
 import { CheckCircle, Clock, User } from 'lucide-react';
+import Navigation from '@/components/Navigation';
 
 export default async function ExpertDashboard() {
   let testsEnAttente: any[] = [];
-  
+
   try {
     testsEnAttente = await prisma.testSigmund.findMany({
       where: { completedAt: { not: null }, estValideParExpert: false },
@@ -17,8 +18,9 @@ export default async function ExpertDashboard() {
   }
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen text-slate-900">
-      <div className="max-w-6xl mx-auto">
+    <div className="bg-gray-50 min-h-screen text-slate-900">
+      <Navigation />
+      <div className="max-w-6xl mx-auto p-8">
         <header className="mb-8">
           <h1 className="text-3xl font-bold">Console d&apos;Expertise YIRA</h1>
           <p className="text-slate-600">Validez les analyses pour les candidats.</p>
