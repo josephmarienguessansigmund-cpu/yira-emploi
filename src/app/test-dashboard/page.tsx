@@ -81,14 +81,14 @@ const modules: ModuleConfig[] = [
           {
             name: 'niveau', label: 'Niveau d\'études', type: 'select', required: true,
             options: [
-              { value: 'aucun', label: 'Aucun' },
-              { value: 'primaire', label: 'Primaire' },
-              { value: 'college', label: 'Collège' },
-              { value: 'lycee', label: 'Lycée' },
-              { value: 'bts_dut', label: 'BTS/DUT' },
-              { value: 'licence_plus', label: 'Licence+' },
+              { value: 'Aucun', label: 'Aucun diplôme' },
+              { value: 'Primaire', label: 'Primaire (CEPE)' },
+              { value: 'BEPC/BEF', label: 'Collège (BEPC / BEF)' },
+              { value: 'BAC', label: 'Lycée (BAC)' },
+              { value: 'BTS/DUT', label: 'BTS / DUT' },
+              { value: 'Licence+', label: 'Licence et plus' },
             ],
-            defaultValue: 'lycee',
+            defaultValue: 'BAC',
           },
           { name: 'specialite', label: 'Spécialité', type: 'text', placeholder: 'Informatique' },
           {
