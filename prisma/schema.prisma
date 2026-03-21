@@ -9,26 +9,26 @@ datasource db {
 }
 
 model YiraExpert {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  nom          String
-  prenom       String?
-  pays         String?
-  role         String   @default("expert")
-  tokensCount  Int      @default(10) @map("tokens_count")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
+  id            String   @id @default(uuid())
+  email         String   @unique
+  nom           String
+  prenom        String?
+  pays          String?
+  role          String   @default("expert")
+  tokensCount   Int      @default(10) @map("tokens_count")
+  countryCode   String   @default("CI") @map("country_code")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
   beneficiaires Talent[]
-
+  @@index([countryCode])
   @@map("YiraExpert")
 }
 
 model Talent {
-  id                String   @id @default(cuid())
+  id                String      @id @default(cuid())
   nom               String
   prenom            String
-  telephone         String   @unique
+  telephone         String      @unique
   email             String?
   dateNaissance     DateTime?
   genre             String?
@@ -40,38 +40,97 @@ model Talent {
   quartier          String?
   zoneGeo           String?
   canalPrefere      String?
-  consentementRGPD  Boolean  @default(false)
-  codeYira          String?  @unique
-  statutParcours    String   @default("INSCRIT")
-  assignedExpertId  String?  @map("assigned_expert_id")
+  consentementRGPD  Boolean     @default(false)
+  codeYira          String?     @unique
+  statutParcours    String      @default("INSCRIT")
+  countryCode       String      @default("CI") @map("country_code")
+  typeProfile       String      @default("jeune")
+  posteActuel       String?
+  ministere         String?
+  corps             String?
+  grade             String?
+  assignedExpertId  String?     @map("assigned_expert_id")
   assignedExpert    YiraExpert? @relation(fields: [assignedExpertId], references: [id])
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
   testsSigmund      TestSigmund[]
   paiements         Paiement[]
-
-  @@map("YiraBeneficiaire") 
+  feedbacks         Feedback[]
+  @@index([countryCode])
+  @@index([typeProfile])
+  @@map("YiraBeneficiaire")
 }
 
 model TestSigmund {
-  id                 String   @id @default(cuid())
-  talentId           String   @map("jeune_id")
-  talent             Talent   @relation(fields: [talentId], references: [id])
-  sigmundTestId      String?
-  completedAt        DateTime?
-  estValideParExpert Boolean  @default(false)
-  rapport            String?
-  createdAt          DateTime @default(now())
+  id                  String       @id @default(cuid())
+  talentId            String       @map("jeune_id")
+  talent              Talent       @relation(fields: [talentId], references: [id])
+  countryCode         String       @default("CI") @map("country_code")
+  sigmundTestId       String?
+  completedAt         DateTime?
+  estValideParExpert  Boolean      @default(false)
+  rapport             String?
+  scoreAdequation     Int?
+  scoreLongevite      Int?
+  scoreTransformation Int?
+  scoreEmployabilite  Int?
+  niveauRisque        String?
+  syntheseIA          String?
+  analyseIAComplete   String?
+  piiGenere           String?
+  posteVise           String?
+  typeEntreprise      String?
+  createdAt           DateTime     @default(now())
+  feedbacks           Feedback[]
+  @@index([countryCode])
+  @@map("TestSigmund")
 }
 
 model Paiement {
-  id        String   @id @default(cuid())
-  talentId  String   @map("jeune_id")
-  talent    Talent   @relation(fields: [talentId], references: [id])
-  montant   Float
-  statut    String   @default("pending")
-  operateur String?
-  reference String?
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  talentId    String   @map("jeune_id")
+  talent      Talent   @relation(fields: [talentId], references: [id])
+  countryCode String   @default("CI") @map("country_code")
+  montant     Float
+  statut      String   @default("pending")
+  operateur   String?
+  reference   String?
+  createdAt   DateTime @default(now())
+  @@index([countryCode])
+  @@map("Paiement")
+}
+
+model Offre {
+  id            String    @id @default(uuid())
+  countryCode   String    @default("CI") @map("country_code")
+  titre         String
+  description   String?
+  secteur       String?
+  region        String?
+  district      String?
+  employeur     String?
+  profilHolland String?
+  niveauMin     String?
+  scoreMinMatch Int?      @default(60)
+  statut        String    @default("ACTIVE")
+  dateLimite    DateTime?
+  createdAt     DateTime  @default(now())
+  @@index([countryCode, statut])
+  @@map("offres")
+}
+
+model Feedback {
+  id               String       @id @default(cuid())
+  countryCode      String       @default("CI") @map("country_code")
+  talentId         String
+  talent           Talent       @relation(fields: [talentId], references: [id])
+  testSigmundId    String?
+  testSigmund      TestSigmund? @relation(fields: [testSigmundId], references: [id])
+  periode          String
+  performanceScore Int?
+  estEncoreEnPoste Boolean      @default(true)
+  commentaire      String?
+  createdAt        DateTime     @default(now())
+  @@index([countryCode])
+  @@map("feedbacks")
 }
