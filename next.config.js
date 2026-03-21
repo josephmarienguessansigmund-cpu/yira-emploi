@@ -3,11 +3,8 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   images: {
-    unoptimized: false,
+    unoptimized: true,
     formats: ['image/avif', 'image/webp'],
-  },
-  experimental: {
-    optimizeCss: true,
   },
 };
 
