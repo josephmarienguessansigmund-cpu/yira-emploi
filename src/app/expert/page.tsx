@@ -38,7 +38,7 @@ export default function ExpertDashboard() {
   const [tests, setTests] = useState<TestEnAttente[]>([]);
   const [beneficiaires, setBeneficiaires] = useState<Beneficiaire[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'tests' | 'beneficiaires' | 'coaching'>('tests');
+  const [activeTab, setActiveTab] = useState<'tests' | 'beneficiaires' | 'coaching' | 'videos'>('tests');
   const [selectedBeneficiaire, setSelectedBeneficiaire] = useState<string | null>(null);
   const [chatMessage, setChatMessage] = useState('');
   const [chatHistory, setChatHistory] = useState<Array<{ role: string; content: string }>>([]);
@@ -180,6 +180,7 @@ export default function ExpertDashboard() {
             { key: 'tests' as const, label: 'Tests en attente' },
             { key: 'beneficiaires' as const, label: 'Bénéficiaires' },
             { key: 'coaching' as const, label: 'Coaching IA' },
+            { key: 'videos' as const, label: 'Vidéos Coaching' },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -393,6 +394,76 @@ export default function ExpertDashboard() {
                   </button>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Videos Coaching Tab */}
+        {activeTab === 'videos' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <h2 className="text-lg font-bold mb-4">Vid&eacute;os de coaching &amp; formation</h2>
+              <p className="text-slate-500 text-sm mb-6">Capsules vid&eacute;o pour accompagner les b&eacute;n&eacute;ficiaires dans leur parcours d&apos;insertion.</p>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Video 1 */}
+                <div className="border rounded-xl overflow-hidden">
+                  <div className="aspect-video bg-gradient-to-br from-green-100 to-green-200 flex flex-col items-center justify-center">
+                    <div className="bg-green-700 text-white w-14 h-14 rounded-full flex items-center justify-center mb-2 shadow-lg">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                    <p className="text-green-700 text-xs font-medium">Emplacement vid&eacute;o</p>
+                    {/* Remplacer par: <video controls className="w-full h-full" src="/videos/reussir-test.mp4" /> */}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-sm mb-1">R&eacute;ussir son test psychom&eacute;trique</h3>
+                    <p className="text-xs text-slate-500">Comment se pr&eacute;parer aux tests Big Five, RIASEC, Soft Skills et Motivation.</p>
+                  </div>
+                </div>
+
+                {/* Video 2 */}
+                <div className="border rounded-xl overflow-hidden">
+                  <div className="aspect-video bg-gradient-to-br from-orange-100 to-orange-200 flex flex-col items-center justify-center">
+                    <div className="bg-orange-600 text-white w-14 h-14 rounded-full flex items-center justify-center mb-2 shadow-lg">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                    <p className="text-orange-700 text-xs font-medium">Emplacement vid&eacute;o</p>
+                    {/* Remplacer par: <video controls className="w-full h-full" src="/videos/tuto-ussd.mp4" /> */}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-sm mb-1">Tuto USSD *789#</h3>
+                    <p className="text-xs text-slate-500">Guide complet pour s&apos;inscrire et acc&eacute;der aux r&eacute;sultats via USSD.</p>
+                  </div>
+                </div>
+
+                {/* Video 3 */}
+                <div className="border rounded-xl overflow-hidden">
+                  <div className="aspect-video bg-gradient-to-br from-blue-100 to-blue-200 flex flex-col items-center justify-center">
+                    <div className="bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center mb-2 shadow-lg">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                    <p className="text-blue-700 text-xs font-medium">Emplacement vid&eacute;o</p>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-sm mb-1">Comprendre son profil Holland (RIASEC)</h3>
+                    <p className="text-xs text-slate-500">D&eacute;crypter le code Holland pour orienter les b&eacute;n&eacute;ficiaires.</p>
+                  </div>
+                </div>
+
+                {/* Video 4 */}
+                <div className="border rounded-xl overflow-hidden">
+                  <div className="aspect-video bg-gradient-to-br from-purple-100 to-purple-200 flex flex-col items-center justify-center">
+                    <div className="bg-purple-600 text-white w-14 h-14 rounded-full flex items-center justify-center mb-2 shadow-lg">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                    <p className="text-purple-700 text-xs font-medium">Emplacement vid&eacute;o</p>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-sm mb-1">Coaching : entretien d&apos;embauche</h3>
+                    <p className="text-xs text-slate-500">Pr&eacute;parer les jeunes aux entretiens d&apos;embauche dans le contexte ivoirien.</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}

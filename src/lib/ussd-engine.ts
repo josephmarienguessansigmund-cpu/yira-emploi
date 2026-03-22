@@ -198,7 +198,8 @@ async function handleInscription(
         continueSession: false,
         response:
           `Inscription réussie ${profil.prenom}!\n` +
-          "Vous recevrez un SMS avec le lien pour votre test SIGMUND.\n" +
+          `Félicitations! Tu as gagné 50 points.\n` +
+          `Télécharge l'App YIRA ici: https://yira-emploi.netlify.app/app pour réclamer tes lots et voir ton analyse Sigmund.\n` +
           "NOHAMA Consulting vous accompagne.",
       };
     } catch (err) {

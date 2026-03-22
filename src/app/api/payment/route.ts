@@ -55,6 +55,19 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Créditer les points au talent si paiement réussi
+    if (status === 'Success') {
+      const pointsBonus = Math.floor((montant || paiement.montant) / 100) * 10;
+      await prisma.talent.update({
+        where: { telephone: phoneNumber },
+        data: {
+          creditFcfa: { increment: montant || paiement.montant },
+          soldePoints: { increment: pointsBonus },
+        },
+      });
+      console.log(`[Payment] Points crédités: ${pointsBonus} points, ${montant || paiement.montant} FCFA pour ${phoneNumber}`);
+    }
+
     return NextResponse.json({ success: true, message: 'Paiement traité.' });
   } catch (error) {
     console.error('[Payment Webhook] Erreur interne:', error);

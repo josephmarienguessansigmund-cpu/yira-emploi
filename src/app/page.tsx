@@ -1,4 +1,4 @@
-import { Users, ClipboardCheck, Briefcase, Phone, Shield, Award } from 'lucide-react';
+import { Users, ClipboardCheck, Briefcase, Phone, Shield, Award, Play, Video } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 
 export default function HomePage() {
@@ -112,6 +112,55 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Vidéos de Présentation */}
+      <section className="max-w-6xl mx-auto px-6 pb-16">
+        <h3 className="text-2xl font-bold text-slate-900 text-center mb-3">D&eacute;couvrez YIRA en vid&eacute;o</h3>
+        <p className="text-slate-500 text-center mb-8 max-w-xl mx-auto">Regardez nos capsules pour comprendre comment r&eacute;ussir votre test et utiliser la plateforme.</p>
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Capsule 1: Réussir son test */}
+          <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+            <div className="aspect-video bg-gradient-to-br from-green-100 to-green-200 flex flex-col items-center justify-center relative">
+              <div className="bg-green-700 text-white w-16 h-16 rounded-full flex items-center justify-center mb-3 shadow-lg">
+                <Play size={28} className="ml-1" />
+              </div>
+              <p className="text-green-800 font-medium text-sm">Vid&eacute;o bient&ocirc;t disponible</p>
+              {/* Emplacement pour la vidéo — remplacer par: */}
+              {/* <video controls className="w-full h-full object-cover" poster="/videos/thumb-reussir-test.jpg">
+                <source src="/videos/reussir-test.mp4" type="video/mp4" />
+              </video> */}
+            </div>
+            <div className="p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Video className="text-green-700" size={16} />
+                <h4 className="font-bold text-slate-900">R&eacute;ussir son test Sigmund</h4>
+              </div>
+              <p className="text-sm text-slate-500">Conseils pour aborder sereinement les &eacute;valuations Big Five, RIASEC et Soft Skills.</p>
+            </div>
+          </div>
+
+          {/* Capsule 2: Tuto USSD */}
+          <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+            <div className="aspect-video bg-gradient-to-br from-orange-100 to-orange-200 flex flex-col items-center justify-center relative">
+              <div className="bg-orange-600 text-white w-16 h-16 rounded-full flex items-center justify-center mb-3 shadow-lg">
+                <Play size={28} className="ml-1" />
+              </div>
+              <p className="text-orange-800 font-medium text-sm">Vid&eacute;o bient&ocirc;t disponible</p>
+              {/* Emplacement pour la vidéo — remplacer par: */}
+              {/* <video controls className="w-full h-full object-cover" poster="/videos/thumb-tuto-ussd.jpg">
+                <source src="/videos/tuto-ussd-789.mp4" type="video/mp4" />
+              </video> */}
+            </div>
+            <div className="p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Phone className="text-orange-600" size={16} />
+                <h4 className="font-bold text-slate-900">Tuto USSD *789#</h4>
+              </div>
+              <p className="text-sm text-slate-500">Comment s&apos;inscrire et consulter ses r&eacute;sultats depuis n&apos;importe quel t&eacute;l&eacute;phone.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Chiffres clés */}
       <section className="bg-green-700 text-white py-12">
         <div className="max-w-6xl mx-auto px-6">
@@ -146,6 +195,11 @@ export default function HomePage() {
           <p className="text-xs text-slate-400 mt-2">
             Programme d&apos;insertion professionnelle des jeunes &mdash; Financ&eacute; avec le soutien de la BAD, GIZ et AFD
           </p>
+          <div className="flex justify-center gap-4 mt-3">
+            <a href="/cgu" className="text-xs text-green-700 hover:underline">Conditions G&eacute;n&eacute;rales</a>
+            <a href="/confidentialite" className="text-xs text-green-700 hover:underline">Protection des Donn&eacute;es (ARTCI)</a>
+            <a href="/app" className="text-xs text-green-700 hover:underline">T&eacute;l&eacute;charger l&apos;App</a>
+          </div>
         </div>
       </footer>
     </div>

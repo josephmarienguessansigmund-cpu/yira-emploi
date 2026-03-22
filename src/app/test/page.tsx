@@ -263,7 +263,7 @@ export default function TestPage() {
               <h3 className="text-xl font-bold text-slate-900 mb-2">
                 {isControlMode ? 'Aperçu : Test lancé !' : 'Test lancé avec succès !'}
               </h3>
-              <p className="text-slate-600 mb-6">
+              <p className="text-slate-600 mb-4">
                 {isControlMode ? (
                   <>Voici l&apos;écran affiché après le lancement réel d&apos;un test. En production, le candidat recevrait un SMS ou un lien pour passer son évaluation Sigmund.</>
                 ) : testUrl ? (
@@ -272,6 +272,25 @@ export default function TestPage() {
                   "Vous recevrez un SMS avec le lien pour passer le test."
                 )}
               </p>
+
+              {/* Points & App Download CTA */}
+              {!isControlMode && (
+                <div className="bg-gradient-to-r from-green-50 to-orange-50 border border-green-200 rounded-xl p-5 mb-6">
+                  <p className="text-green-800 font-bold text-lg mb-1">
+                    F&eacute;licitations ! Tu as gagn&eacute; 50 points
+                  </p>
+                  <p className="text-slate-600 text-sm mb-4">
+                    T&eacute;l&eacute;charge l&apos;App YIRA pour r&eacute;clamer tes lots et voir ton analyse Sigmund compl&egrave;te.
+                  </p>
+                  <a
+                    href="https://yira-emploi.netlify.app/app?ref=quiz&utm_source=quiz_completion"
+                    className="inline-flex items-center gap-2 bg-green-700 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-green-800 transition-colors text-sm"
+                  >
+                    <ExternalLink size={16} />
+                    T&eacute;l&eacute;charger l&apos;App YIRA
+                  </a>
+                </div>
+              )}
 
               {isControlMode && (
                 <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 text-sm text-orange-700">

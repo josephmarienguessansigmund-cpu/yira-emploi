@@ -79,6 +79,58 @@ export default function InscriptionPage() {
   const [codeYira, setCodeYira] = useState('');
   const [copied, setCopied] = useState(false);
 
+  // OTP state
+  const [otpStep, setOtpStep] = useState<'idle' | 'sent' | 'verified'>('idle');
+  const [otpCode, setOtpCode] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState('');
+
+  async function sendOTP() {
+    if (!form.telephone) return;
+    setOtpLoading(true);
+    setOtpError('');
+    try {
+      const res = await fetch('/api/otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'send', telephone: form.telephone }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setOtpStep('sent');
+      } else {
+        setOtpError(data.error || "Erreur lors de l'envoi du code.");
+      }
+    } catch {
+      setOtpError('Erreur réseau.');
+    } finally {
+      setOtpLoading(false);
+    }
+  }
+
+  async function verifyOTP() {
+    if (!otpCode) return;
+    setOtpLoading(true);
+    setOtpError('');
+    try {
+      const res = await fetch('/api/otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verify', telephone: form.telephone, code: otpCode }),
+      });
+      const data = await res.json();
+      if (res.ok && data.verified) {
+        setOtpStep('verified');
+      } else {
+        setOtpError(data.error || 'Code incorrect.');
+      }
+    } catch {
+      setOtpError('Erreur réseau.');
+    } finally {
+      setOtpLoading(false);
+    }
+  }
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value, type } = e.target;
     if (type === 'checkbox') {
@@ -173,10 +225,16 @@ export default function InscriptionPage() {
               href="/test"
               className="bg-green-700 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-800 transition-colors"
             >
-              Passer le test d&apos;évaluation
+              Passer le test d&apos;&eacute;valuation
+            </a>
+            <a
+              href={`https://yira-emploi.netlify.app/app?ref=inscription&tel=${encodeURIComponent(form.telephone)}`}
+              className="bg-orange-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors"
+            >
+              T&eacute;l&eacute;charger l&apos;App YIRA
             </a>
             <a href="/" className="text-slate-500 hover:text-slate-700 text-sm">
-              Retour à l&apos;accueil
+              Retour &agrave; l&apos;accueil
             </a>
           </div>
         </div>
@@ -268,8 +326,58 @@ export default function InscriptionPage() {
 
                 <div>
                   <label htmlFor="telephone" className={labelClass}>Téléphone *</label>
-                  <input type="tel" id="telephone" name="telephone" required value={form.telephone} onChange={handleChange} className={inputClass} placeholder="Ex: 0701020304" />
+                  <input type="tel" id="telephone" name="telephone" required value={form.telephone} onChange={(e) => { handleChange(e); if (otpStep !== 'idle') { setOtpStep('idle'); setOtpCode(''); } }} className={inputClass} placeholder="Ex: 0701020304" />
                 </div>
+
+                {/* OTP Verification */}
+                {form.telephone.length >= 10 && otpStep !== 'verified' && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-sm text-blue-800 font-medium mb-2">V&eacute;rification du num&eacute;ro (OTP)</p>
+                    {otpStep === 'idle' && (
+                      <button
+                        type="button"
+                        onClick={sendOTP}
+                        disabled={otpLoading}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+                      >
+                        {otpLoading ? 'Envoi...' : 'Envoyer le code SMS'}
+                      </button>
+                    )}
+                    {otpStep === 'sent' && (
+                      <div className="space-y-2">
+                        <p className="text-xs text-blue-600">Un code &agrave; 6 chiffres a &eacute;t&eacute; envoy&eacute; par SMS.</p>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            maxLength={6}
+                            value={otpCode}
+                            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                            className="w-32 border border-blue-300 rounded-lg px-3 py-2 text-center font-mono text-lg tracking-widest focus:ring-2 focus:ring-blue-500 outline-none"
+                            placeholder="000000"
+                          />
+                          <button
+                            type="button"
+                            onClick={verifyOTP}
+                            disabled={otpLoading || otpCode.length < 6}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+                          >
+                            {otpLoading ? 'V&eacute;rification...' : 'V&eacute;rifier'}
+                          </button>
+                        </div>
+                        <button type="button" onClick={sendOTP} disabled={otpLoading} className="text-xs text-blue-600 hover:underline">
+                          Renvoyer le code
+                        </button>
+                      </div>
+                    )}
+                    {otpError && <p className="text-xs text-red-600 mt-1">{otpError}</p>}
+                  </div>
+                )}
+                {otpStep === 'verified' && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2 flex items-center gap-2">
+                    <CheckCircle size={16} className="text-green-600" />
+                    <span className="text-sm text-green-700 font-medium">Num&eacute;ro v&eacute;rifi&eacute;</span>
+                  </div>
+                )}
 
                 <div>
                   <label htmlFor="email" className={labelClass}>Email <span className="text-slate-400">(optionnel)</span></label>

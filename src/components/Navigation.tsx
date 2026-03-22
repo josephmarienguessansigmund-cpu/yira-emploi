@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, Home, UserPlus, ClipboardCheck, Users, FlaskConical, LogIn, Shield, LogOut } from 'lucide-react';
+import { Menu, X, Home, UserPlus, ClipboardCheck, Users, FlaskConical, LogIn, Shield, LogOut, DollarSign } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const PUBLIC_NAV_ITEMS = [
@@ -17,7 +17,10 @@ export default function Navigation() {
   const navItems = [
     ...PUBLIC_NAV_ITEMS,
     ...(user ? [{ href: '/expert', label: 'Espace Expert', icon: Users }] : []),
-    ...(profile?.role === 'admin' ? [{ href: '/admin', label: 'Administration', icon: Shield }] : []),
+    ...(profile?.role === 'admin' ? [
+      { href: '/admin', label: 'Administration', icon: Shield },
+      { href: '/admin/finance', label: 'Finance', icon: DollarSign },
+    ] : []),
     { href: '/test-dashboard', label: 'Tests API', icon: FlaskConical },
   ];
 

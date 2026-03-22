@@ -43,6 +43,8 @@ model Talent {
   consentementRGPD  Boolean     @default(false)
   codeYira          String?     @unique
   statutParcours    String      @default("INSCRIT")
+  soldePoints       Int         @default(0) @map("solde_points")
+  creditFcfa        Int         @default(0) @map("credit_fcfa")
   countryCode       String      @default("CI") @map("country_code")
   typeProfile       String      @default("jeune")
   posteActuel       String?
@@ -87,15 +89,17 @@ model TestSigmund {
 }
 
 model Paiement {
-  id          String   @id @default(cuid())
-  talentId    String   @map("jeune_id")
-  talent      Talent   @relation(fields: [talentId], references: [id])
-  countryCode String   @default("CI") @map("country_code")
-  montant     Float
-  statut      String   @default("pending")
-  operateur   String?
-  reference   String?
-  createdAt   DateTime @default(now())
+  id              String   @id @default(cuid())
+  talentId        String   @map("jeune_id")
+  talent          Talent   @relation(fields: [talentId], references: [id])
+  countryCode     String   @default("CI") @map("country_code")
+  montant         Float
+  statut          String   @default("pending")
+  operateur       String?
+  reference       String?
+  typePaiement    String   @default("QUIZ_PREMIUM") @map("type_paiement")
+  description     String?
+  createdAt       DateTime @default(now())
   @@index([countryCode])
   @@map("Paiement")
 }
