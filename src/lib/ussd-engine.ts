@@ -4,6 +4,11 @@
 // ============================================================
 import type { USSDSession, USSDResponse, ProfilTalent } from "@/types";
 import prisma from "./db";
+import { alphaSync, logBridgeStatus } from "./alpha-sync";
+import { PRICING } from "./config";
+
+// Activation des logs ALPHA SYNC au chargement du module
+logBridgeStatus();
 
 // Store en mémoire pour sessions courtes (< 3min)
 // En production: remplacer par Redis ou une table sessions en DB
@@ -28,9 +33,17 @@ export async function handleUSSD(session: USSDSession): Promise<USSDResponse> {
   const inputs = text ? text.split("*") : [];
   const level = inputs.length; // profondeur dans le menu
 
+  // Log ALPHA SYNC pour chaque interaction
+  alphaSync("USSD_INPUT", {
+    phone: phoneNumber,
+    sessionId,
+    details: { text, level },
+  });
+
   // Niveau 0 : accueil
   if (text === "" || text === undefined) {
     setState(sessionId, { phone: phoneNumber, step: "WELCOME" });
+    alphaSync("USSD_SESSION_START", { phone: phoneNumber, sessionId });
     return {
       continueSession: true,
       response: menuBienvenue(),
@@ -47,10 +60,13 @@ export async function handleUSSD(session: USSDSession): Promise<USSDResponse> {
         setState(sessionId, { step: "INSCRIPTION" });
         return { continueSession: true, response: menuInscription() };
       case "2":
+        alphaSync("USSD_OFFRES", { phone: phoneNumber, sessionId });
         return await menuOffres();
       case "3":
+        alphaSync("USSD_RESULTATS", { phone: phoneNumber, sessionId });
         return await menuResultats(phoneNumber);
       case "0":
+        alphaSync("USSD_SESSION_END", { phone: phoneNumber, sessionId });
         return { continueSession: false, response: "Au revoir ! NOHAMA Consulting - YIRA Emploi" };
       default:
         return { continueSession: true, response: menuBienvenue("Choix invalide. ") };
@@ -72,7 +88,8 @@ export async function handleUSSD(session: USSDSession): Promise<USSDResponse> {
 function menuBienvenue(prefixe = ""): string {
   return (
     `${prefixe}Bienvenue sur YIRA Emploi\n` +
-    "Plateforme d'insertion - NOHAMA\n\n" +
+    "Plateforme d'insertion - NOHAMA\n" +
+    `Évaluation: ${PRICING.EVALUATION_FCFA.toLocaleString("fr-FR")} FCFA\n\n` +
     "1. M'inscrire\n" +
     "2. Voir les offres\n" +
     "3. Mes résultats SIGMUND\n" +
@@ -185,11 +202,17 @@ async function handleInscription(
 
     try {
       await sauvegarderProfil(profil);
+      alphaSync("USSD_INSCRIPTION", {
+        phone,
+        sessionId,
+        details: { prenom: profil.prenom, region, niveau: state.niveau, secteur: state.secteur },
+      });
       return {
         continueSession: false,
         response:
           `Inscription réussie ${profil.prenom}!\n` +
-          "Vous recevrez un SMS avec le lien pour votre test SIGMUND.\n" +
+          `Évaluation SIGMUND: ${PRICING.EVALUATION_FCFA.toLocaleString("fr-FR")} FCFA\n` +
+          "Vous recevrez un SMS avec le lien pour votre test.\n" +
           "NOHAMA Consulting vous accompagne.",
       };
     } catch (err) {

@@ -5,6 +5,7 @@
 [build.environment]
   NODE_VERSION = "20"
   NEXT_TELEMETRY_DISABLED = "1"
+  NEXT_PUBLIC_APP_URL = "https://evaluation.yira-ci.com"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
@@ -32,3 +33,19 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type, Authorization, X-Sigmund-Client"
+
+# Headers CORS pour Magic Link auth
+[[headers]]
+  for = "/api/auth/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+
+# Headers CORS pour Payment webhook
+[[headers]]
+  for = "/api/payment/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type"

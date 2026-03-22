@@ -5,6 +5,7 @@
 // ============================================================
 import { NextRequest, NextResponse } from "next/server";
 import { handleUSSD } from "@/lib/ussd-engine";
+import { alphaSync } from "@/lib/alpha-sync";
 import type { USSDSession } from "@/types";
 
 export const dynamic = 'force-dynamic';
@@ -47,6 +48,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // Traitement du menu USSD
+    alphaSync("USSD_INPUT", {
+      phone: session.phoneNumber,
+      sessionId: session.sessionId,
+      details: { method: "POST", text: session.text },
+    });
     const result = await handleUSSD(session);
 
     // Réponse au format Africa's Talking

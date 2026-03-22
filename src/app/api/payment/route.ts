@@ -5,6 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { alphaSync } from '@/lib/alpha-sync';
+import { PRICING } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,12 +28,17 @@ export async function POST(request: NextRequest) {
 
   const { status, phoneNumber, value } = payload;
 
-  console.log(`[Payment Webhook] phone=${phoneNumber} status=${status}`);
+  console.log(`[Payment Webhook] phone=${phoneNumber} status=${status} tarif=${PRICING.EVALUATION_FCFA} FCFA`);
 
   try {
     if (!phoneNumber) {
       return NextResponse.json({ error: 'phoneNumber manquant' }, { status: 400 });
     }
+
+    alphaSync('PAYMENT_RECEIVED', {
+      phone: phoneNumber,
+      details: { status, value, tarif: PRICING.EVALUATION_FCFA },
+    });
 
     const talent = await prisma.talent.findUnique({
       where: { telephone: phoneNumber },
