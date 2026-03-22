@@ -129,7 +129,7 @@ export const smsService = {
       `Bienvenue ${prenom} sur YIRA Emploi! ` +
       `Votre code: ${codeYira}. ` +
       `Félicitations! Tu as gagné 50 points. ` +
-      `Télécharge l'App YIRA: https://yira-emploi.netlify.app/app?tel=${encodeURIComponent(to)} pour réclamer tes lots et voir ton analyse Sigmund. ` +
+      `Télécharge l'App YIRA: https://yira-evaluationpro.netlify.app/app?tel=${encodeURIComponent(to)} pour réclamer tes lots et voir ton analyse Sigmund. ` +
       `NOHAMA Consulting`;
     return smsService.send(to, message);
   },

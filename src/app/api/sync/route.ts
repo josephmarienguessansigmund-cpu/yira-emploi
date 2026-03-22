@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { isAlphaUser } from "@/lib/whitelist";
 
 export const dynamic = "force-dynamic";
 
@@ -68,6 +69,13 @@ export async function GET(req: NextRequest) {
     }
 
     // Profil unifié omnicanal
+    // Alpha sync surveillance
+    if (isAlphaUser(telephone)) {
+      console.log(
+        `[ALPHA SYNC LOG] GET profil Alpha: ${phone} — points: ${talent.soldePoints}, credit: ${talent.creditFcfa}, tests: ${talent.testsSigmund.length}, paiements: ${talent.paiements.length}`
+      );
+    }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -191,6 +199,13 @@ export async function POST(req: NextRequest) {
     console.log(
       `[Sync] Profil mis à jour via canal ${canal || "inconnu"}: ${phone}`
     );
+
+    // Alpha sync surveillance
+    if (isAlphaUser(telephone)) {
+      console.log(
+        `[ALPHA SYNC LOG] POST update Alpha: ${phone} via canal ${canal || "inconnu"} — points: ${talent.soldePoints}, credit: ${talent.creditFcfa}`
+      );
+    }
 
     return NextResponse.json({
       success: true,

@@ -2,11 +2,13 @@
  * YIRA – Initiation de paiement Mobile Money
  * POST /api/payment/initiate
  * Crée un paiement et lance le checkout via Africa's Talking
+ * Intègre le bypass Alpha pour les numéros whitelistés.
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { paymentService, TARIFS, TypeProduit } from "@/lib/payment-service";
+import { isAlphaUser } from "@/lib/whitelist";
 
 export const dynamic = "force-dynamic";
 
@@ -54,11 +56,57 @@ export async function POST(request: NextRequest) {
       PACK_COMPLET: "Pack Complet (Quiz + Rapport)",
     };
 
-    // Créer l'enregistrement de paiement
+    // --- Whitelist Alpha : bypass paiement ---
+    if (isAlphaUser(telephone)) {
+      console.log(`[ALPHA] Bypass paiement pour numéro Alpha: ${phone}`);
+      const paiement = await prisma.paiement.create({
+        data: {
+          talentId: talent.id,
+          montant,
+          pricePaid: 0,
+          statut: "SUCCESS",
+          operateur: "ALPHA_TEST",
+          typePaiement: type,
+          description: `${descriptions[type] || "Paiement YIRA"} (Alpha — gratuit)`,
+          reference: `ALPHA-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+        },
+      });
+
+      // Créditer les points
+      const pointsBonus = Math.floor(montant / 100) * 10;
+      await prisma.talent.update({
+        where: { id: talent.id },
+        data: {
+          soldePoints: { increment: pointsBonus },
+          creditFcfa: { increment: montant },
+        },
+      });
+
+      console.log(`[ALPHA SYNC LOG] Transaction Alpha réussie: ${phone} — ${type} — +${pointsBonus} pts, +${montant} FCFA`);
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          paiementId: paiement.id,
+          montant,
+          pricePaid: 0,
+          type,
+          description: descriptions[type],
+          operateur: "ALPHA_TEST",
+          statut: "succes",
+          isAlpha: true,
+          pointsCredites: pointsBonus,
+          message: "Accès Alpha — transaction validée sans paiement.",
+        },
+      });
+    }
+
+    // --- Flux normal pour les utilisateurs standards ---
     const paiement = await prisma.paiement.create({
       data: {
         talentId: talent.id,
         montant,
+        pricePaid: montant,
         statut: "pending",
         operateur: paymentService.detecterOperateur(phone),
         typePaiement: type,
@@ -75,7 +123,6 @@ export async function POST(request: NextRequest) {
     );
 
     if (result.success) {
-      // Mettre à jour la référence avec l'ID de transaction
       await prisma.paiement.update({
         where: { id: paiement.id },
         data: {
@@ -89,6 +136,7 @@ export async function POST(request: NextRequest) {
       data: {
         paiementId: paiement.id,
         montant,
+        pricePaid: montant,
         type,
         description: descriptions[type],
         operateur: paymentService.detecterOperateur(phone),

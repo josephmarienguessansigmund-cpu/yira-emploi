@@ -5,6 +5,7 @@
 import type { USSDSession, USSDResponse, ProfilTalent } from "@/types";
 import prisma from "./db";
 import { smsService } from "./sms-service";
+import { isAlphaUser } from "./whitelist";
 
 // Store en mémoire pour sessions courtes (< 3min)
 // En production: remplacer par Redis ou une table sessions en DB
@@ -28,6 +29,11 @@ export async function handleUSSD(session: USSDSession): Promise<USSDResponse> {
   const { sessionId, phoneNumber, text } = session;
   const inputs = text ? text.split("*") : [];
   const level = inputs.length; // profondeur dans le menu
+
+  // Alpha sync logging
+  if (isAlphaUser(phoneNumber)) {
+    console.log(`[ALPHA SYNC LOG] USSD session Alpha: ${phoneNumber} — input: "${text}" — sessionId: ${sessionId}`);
+  }
 
   // Niveau 0 : accueil
   if (text === "" || text === undefined) {
@@ -187,6 +193,11 @@ async function handleInscription(
     try {
       await sauvegarderProfil(profil);
 
+      // Alpha sync log
+      if (isAlphaUser(phone)) {
+        console.log(`[ALPHA SYNC LOG] Inscription USSD Alpha: ${phone} — ${profil.prenom} ${profil.nom}`);
+      }
+
       // Envoyer SMS de confirmation (non-bloquant)
       smsService.sendInscriptionConfirmation(
         phone,
@@ -199,7 +210,7 @@ async function handleInscription(
         response:
           `Inscription réussie ${profil.prenom}!\n` +
           `Félicitations! Tu as gagné 50 points.\n` +
-          `Télécharge l'App YIRA ici: https://yira-emploi.netlify.app/app pour réclamer tes lots et voir ton analyse Sigmund.\n` +
+          `Télécharge l'App YIRA ici: https://yira-evaluationpro.netlify.app/app pour réclamer tes lots et voir ton analyse Sigmund.\n` +
           "NOHAMA Consulting vous accompagne.",
       };
     } catch (err) {

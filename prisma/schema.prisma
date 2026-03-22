@@ -94,6 +94,7 @@ model Paiement {
   talent          Talent   @relation(fields: [talentId], references: [id])
   countryCode     String   @default("CI") @map("country_code")
   montant         Float
+  pricePaid       Float?   @map("price_paid")
   statut          String   @default("pending")
   operateur       String?
   reference       String?
