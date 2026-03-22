@@ -4,6 +4,7 @@
 // ============================================================
 import type { USSDSession, USSDResponse, ProfilTalent } from "@/types";
 import prisma from "./db";
+import { smsService } from "./sms-service";
 
 // Store en mémoire pour sessions courtes (< 3min)
 // En production: remplacer par Redis ou une table sessions en DB
@@ -185,6 +186,14 @@ async function handleInscription(
 
     try {
       await sauvegarderProfil(profil);
+
+      // Envoyer SMS de confirmation (non-bloquant)
+      smsService.sendInscriptionConfirmation(
+        phone,
+        profil.prenom || "",
+        "YIRA"
+      ).catch((err) => console.error("[USSD] Erreur envoi SMS confirmation:", err));
+
       return {
         continueSession: false,
         response:

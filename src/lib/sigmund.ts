@@ -9,6 +9,7 @@ import type {
   SigmundTestResult,
   SigmundResultats,
 } from "@/types";
+import { smsService } from "./sms-service";
 
 const SIGMUND_CLIENT_ID =
   process.env.SIGMUND_CLIENT_ID ?? "8937-6771-8414-4521";
@@ -92,21 +93,15 @@ export async function getResultatSession(
 }
 
 // -------------------------------------------------------
-// Envoyer le lien de test par SMS via USSD gateway
-// (le lien court permet de répondre sur feature phone)
+// Envoyer le lien de test par SMS via Africa's Talking
 // -------------------------------------------------------
 export async function envoyerLienTestSMS(
   telephone: string,
   lienTest: string
 ): Promise<boolean> {
   try {
-    const client = createSigmundClient();
-    await client.post("/notifications/sms", {
-      client_id: SIGMUND_CLIENT_ID,
-      phone: telephone,
-      message: `YIRA Emploi: Votre test SIGMUND est prêt. Cliquez ici: ${lienTest} - NOHAMA Consulting`,
-    });
-    return true;
+    const result = await smsService.sendTestLink(telephone, lienTest);
+    return result.success;
   } catch (err) {
     console.error("[Sigmund] Erreur envoi SMS:", err);
     return false;

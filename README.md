@@ -39,6 +39,8 @@ yira-emploi/
 | `SIGMUND_PRODUCT_CODE` | Code produit SIGMUND | `25` |
 | `SIGMUND_BASE_URL` | URL API SIGMUND | `https://api.sigmund-assessment.com/v1` |
 | `NEXT_PUBLIC_APP_URL` | URL publique du site | `https://yira-emploi.netlify.app` |
+| `AT_API_KEY` | Clé API Africa's Talking | `atsk_...` |
+| `AT_USERNAME` | Nom d'utilisateur Africa's Talking | `sandbox` (test) ou votre username (prod) |
 
 ---
 

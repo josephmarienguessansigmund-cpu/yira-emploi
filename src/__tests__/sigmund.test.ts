@@ -7,6 +7,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // Créer les mocks en dehors pour les partager
 const mockPost = vi.fn();
 const mockGet = vi.fn();
+const mockSmsSend = vi.fn();
 
 // Mock axios au niveau module
 vi.mock('axios', () => ({
@@ -18,11 +19,19 @@ vi.mock('axios', () => ({
   },
 }));
 
+// Mock sms-service
+vi.mock('@/lib/sms-service', () => ({
+  smsService: {
+    sendTestLink: (...args: unknown[]) => mockSmsSend(...args),
+  },
+}));
+
 import { creerSessionEvaluation, getResultatSession, envoyerLienTestSMS } from '@/lib/sigmund';
 
 describe('Sigmund API Client', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSmsSend.mockReset();
   });
 
   describe('creerSessionEvaluation', () => {
@@ -189,19 +198,16 @@ describe('Sigmund API Client', () => {
   });
 
   describe('envoyerLienTestSMS', () => {
-    it('envoie un SMS avec le lien de test', async () => {
-      mockPost.mockResolvedValueOnce({ data: { success: true } });
+    it('envoie un SMS avec le lien de test via smsService', async () => {
+      mockSmsSend.mockResolvedValueOnce({ success: true });
 
       const result = await envoyerLienTestSMS('+2250701020304', 'https://sigmund.com/test/abc');
       expect(result).toBe(true);
-      expect(mockPost).toHaveBeenCalledWith('/notifications/sms', expect.objectContaining({
-        phone: '+2250701020304',
-        message: expect.stringContaining('https://sigmund.com/test/abc'),
-      }));
+      expect(mockSmsSend).toHaveBeenCalledWith('+2250701020304', 'https://sigmund.com/test/abc');
     });
 
     it('retourne false en cas d\'erreur', async () => {
-      mockPost.mockRejectedValueOnce(new Error('SMS failed'));
+      mockSmsSend.mockResolvedValueOnce({ success: false, error: 'SMS failed' });
 
       const result = await envoyerLienTestSMS('+225000', 'https://test.com');
       expect(result).toBe(false);
