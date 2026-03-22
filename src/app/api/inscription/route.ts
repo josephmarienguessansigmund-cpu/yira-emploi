@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { genererCodeYira } from '@/lib/yira-code';
+import { smsService } from '@/lib/sms-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -73,6 +74,12 @@ export async function POST(req: NextRequest) {
         codeYira,
       },
     });
+
+    // Send confirmation SMS
+    smsService.send(
+      phone,
+      `Bienvenue sur YIRA Emploi ${prenom} ! Votre code: ${codeYira}. Composez *789# pour accéder à vos services. NOHAMA Consulting`
+    ).catch(() => {/* SMS failure is non-blocking */});
 
     return NextResponse.json({
       success: true,

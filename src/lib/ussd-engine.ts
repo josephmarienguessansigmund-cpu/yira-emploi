@@ -208,11 +208,34 @@ async function handleInscription(
 // Menu offres d'emploi
 // -------------------------------------------------------
 async function menuOffres(): Promise<USSDResponse> {
-  // No job offers table exists yet — return a placeholder message
-  return {
-    continueSession: false,
-    response: "Aucune offre disponible pour le moment.\nRevenez bientôt !",
-  };
+  try {
+    const offres = await prisma.offre.findMany({
+      where: { statut: "ACTIVE" },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    });
+
+    if (offres.length === 0) {
+      return {
+        continueSession: false,
+        response: "Aucune offre disponible pour le moment.\nRevenez bientôt !",
+      };
+    }
+
+    let text = "OFFRES D'EMPLOI YIRA\n\n";
+    for (const o of offres) {
+      text += `• ${o.titre} (${o.region || "CI"})\n  ${o.employeur || ""} — ${o.niveauMin || "Tous niveaux"}\n`;
+    }
+    text += "\nInfos : emploi@nohama.ci";
+
+    return { continueSession: false, response: text };
+  } catch (err) {
+    console.error("[USSD] Erreur offres:", err);
+    return {
+      continueSession: false,
+      response: "Service offres temporairement indisponible.",
+    };
+  }
 }
 
 // -------------------------------------------------------
