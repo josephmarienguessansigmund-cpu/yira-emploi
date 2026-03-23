@@ -1,11 +1,23 @@
 -- ============================================================
 -- YIRA EMPLOI — NOHAMA Consulting
--- Script d'initialisation PostgreSQL
--- À exécuter une fois sur votre DB (Neon, Supabase, Railway...)
+-- Script d'initialisation PostgreSQL (Optimisé & Sécurisé)
+-- Joseph-Marie N'GUESSAN - Expert Certifié SIGMUND
 -- ============================================================
 
 -- Extension UUID
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- -------------------------------------------------------
+-- Fonction automatique de mise à jour du Timestamp
+-- (Évite les boucles de calcul infinies sur Netlify)
+-- -------------------------------------------------------
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;   
+END;
+$$ language 'plpgsql';
 
 -- -------------------------------------------------------
 -- Table candidats
@@ -28,19 +40,30 @@ CREATE TABLE IF NOT EXISTS candidats (
     updated_at          TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Trigger pour candidats
+DROP TRIGGER IF EXISTS trg_update_candidats ON candidats;
+CREATE TRIGGER trg_update_candidats
+    BEFORE UPDATE ON candidats
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
 -- -------------------------------------------------------
 -- Table évaluations SIGMUND
 -- -------------------------------------------------------
 CREATE TABLE IF NOT EXISTS evaluations (
     id                  UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    candidat_telephone  VARCHAR(20) NOT NULL REFERENCES candidats(telephone),
+    -- Ajout de ON UPDATE CASCADE pour éviter les erreurs 8600$ lors du changement de numéro
+    candidat_telephone  VARCHAR(20) NOT NULL 
+                        REFERENCES candidats(telephone) 
+                        ON DELETE CASCADE 
+                        ON UPDATE CASCADE,
     sigmund_session_id  VARCHAR(100) UNIQUE NOT NULL,
     type_evaluation     VARCHAR(20) DEFAULT 'COMPLET',
     status              VARCHAR(20) DEFAULT 'PENDING'
                         CHECK (status IN ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'EXPIRED')),
     lien_test           TEXT,
     resultats           JSONB,
-    profil_global       TEXT,
+    score_global        INTEGER, -- Ajout pour reporting rapide YIRA
     code_holland        VARCHAR(10),
     created_at          TIMESTAMPTZ DEFAULT NOW(),
     completed_at        TIMESTAMPTZ
@@ -63,18 +86,9 @@ CREATE TABLE IF NOT EXISTS offres (
 );
 
 -- -------------------------------------------------------
--- Index de performance
+-- Index de performance (Vital pour les grands volumes YIRA)
 -- -------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_candidats_telephone ON candidats(telephone);
 CREATE INDEX IF NOT EXISTS idx_evaluations_session ON evaluations(sigmund_session_id);
 CREATE INDEX IF NOT EXISTS idx_evaluations_telephone ON evaluations(candidat_telephone);
 CREATE INDEX IF NOT EXISTS idx_offres_statut ON offres(statut);
-
--- -------------------------------------------------------
--- Données de test (à supprimer en production)
--- -------------------------------------------------------
-INSERT INTO offres (titre, secteur, region, employeur, statut) VALUES
-  ('Agent Commercial Junior', 'Commerce', 'Abidjan', 'NOHAMA Consulting', 'ACTIVE'),
-  ('Technicien Informatique', 'Tech/Numérique', 'Abidjan', 'Client NOHAMA', 'ACTIVE'),
-  ('Assistant Agricole', 'Agriculture', 'Bouaké', 'Agri-CI', 'ACTIVE')
-ON CONFLICT DO NOTHING;
